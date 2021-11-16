@@ -1,4 +1,3 @@
-// console.log("Hello Sketch")
 // these are the variables you can use as inputs to your algorithms
 // console.log("HASH", fxhash)   // the 64 chars hex number fed to your algorithm
 // con.sole.log("RAND", fxrand()) // deterministic PRNG function, use it instead of Math.random()
@@ -43,7 +42,6 @@ var lightSourceDepth;
 var palettes;
 // noprotect
 
-// function draw() { }
 
 function keyPressed() {
   if (keyCode == 83) {
@@ -51,66 +49,100 @@ function keyPressed() {
   } 
 }
 function draw() {
-    // console.log("draw")  
-	  createCanvas(DIM, DIM);
-	  background(0);
-		// hashIdx = 1;
-    // let chars = "abcdef1234567890";
-    // hash = "0x";
-    // while (hash.length < 64) hash = hash + chars.charAt(Math.floor(random(0, 16)));
-    // console.log("Generated Seed:" + hash);
-		// noiseSeed(xx())
-	 // hash = "0xca3657fc18895a9741745dfc8e988aab63bef4ab478cb596be6a247f5b4d2b"
-  // console.log("hash", hash)
+  createCanvas(DIM, DIM);
+  background(0);
 
   palettes = normie_palettes;
   let paletteTier = fxrand();
-  console.log("paletteTier:", paletteTier);
   if (paletteTier <= 0.01) {
     palettes = ultra_rare_palettes;
-    console.log("ultra rare")
   } else if (paletteTier <= 0.04) {
     palettes = super_rare_palettes;
-    console.log("super_rare_palettes")
   } else if (paletteTier <= .14) {
     palettes = rare_palettes;
-    console.log("rare_palettes")
   } else {
     palettes = normie_palettes;
-    console.log("normie_palettes")
   }
   
   var paletteInx = ibtw(0, palettes.length)
-		palette = palettes[paletteInx]
-    horizonY = DIM * (2 / 3)
-    clrs = palettes[paletteInx]["colors"]
-		lightx = ibtw(DIM * 1/6.0, DIM * 5/6.0); lighty =ibtw(DIM * (1/6.0), DIM * (3/6.0));
-	  lightRadiusBounds = [DIM/6, DIM/2.25]
-		let hasSpaceRing = p(.9)
-		let spaceRingVertex = [ibtw(0-DIM/2, DIM*(3/2)), ibtw(0-3*DIM, DIM*4)]
-		skewRadialFill = p(.5);
-		skewRadialOutline = p(.5);
-	  lightSourceDepth = ibtw(1,4);
+  palette = palettes[paletteInx]
+  horizonY = DIM * (2 / 3)
+  clrs = palettes[paletteInx]["colors"]
+  lightx = ibtw(DIM * 1 / 6.0, DIM * 5 / 6.0); lighty = ibtw(DIM * (1 / 6.0), DIM * (3 / 6.0));
+  lightRadiusBounds = [DIM / 6, DIM / 2.75]
+  let hasSpaceRing = p(.66)
+  let spaceRingVertex = [ibtw(0 - DIM / 2, DIM * (3 / 2)), ibtw(0 - 3 * DIM, DIM * 4)]
+  skewRadialFill = p(.5);
+  skewRadialOutline = p(.5);
+  lightSourceDepth = ibtw(1, 4);
   let hasStars = p(.9);
   let hasAsteroids = p(.9);
-		if(p(.3)) {skyBandGradient()}
-    else if (p(.25)) { sparseBarGradient(); }
+  let moonHash = fxrand()
+  let moonCount = 0;
+  if (moonHash < .2) {
+    moonCount = 0;
+  } else if (moonHash < .3) { 
+    moonCount = 1;
+  } else if (moonHash < .6) {
+    moonCount = 7;
+  } else if (moonHash < .8) {
+    moonCount = 19;
+  } else {
+    moonCount = 37;
+  }
+  let voidbg = false;
+  // ymin, ymax, wmin, wmax
+  let hasNebulaBands = false;
+  if (p(.5)) {
+    let hasGrad = false
+    if (p(.5)) {
+      singleSplitGradient(.03, .15, .05, .08);
+      hasGrad = true;
+    }
+    if (p(.5)) {
+      singleSplitGradient(.85, .97, .05, .08);
+      hasGrad = true;
+    }
+    if (p(.5)) {
+      //.2, .8, .2, .6
+      doubleSplitGradient(.2, .8, .2, .6);
+      hasGrad = true;
+    }
+    hasNebulaBands = hasGrad;
+  } else if (p(.3)) {
+    skyBandGradient()
+    hasNebulaBands = true;
+  } else if (p(.25)) {
+    sparseBarGradient();
+    hasNebulaBands = true;
+  } 
+  if (!hasSpaceRing && ! hasNebulaBands) voidbg = true;
+  
   window.$fxhashFeatures = {
     "Palette": palettes[paletteInx]["name"],
     "Stars": hasStars,
-    "Asteroids" : hasAsteroids,
+    "Moons": moonCount,
+    "Nebula Bands" : hasNebulaBands,
+    "Asteroids": hasAsteroids,
+    "Spacerings": hasSpaceRing,
+    "Void" : voidbg
   }
-  console.log(window.$fxhashFeatures)
+  // console.log(window.$fxhashFeatures)
   if (hasSpaceRing) spaceRings(p(.5), spaceRingVertex);
-  // noLoop();
-  // return;
-	let biCircles = ibtw(0,3);
+  remainingMoons = moonCount;
+	let biCircles = ibtw(0,max(3,moonCount));
 	for(let i = 0; i < biCircles; i++){
-		triGradientCircle(ibtw(DIM * 1/8.0, DIM * 7/8.0), ibtw(DIM * (1/8.0), DIM * (7/8.0) ), ibtw(DIM/20, DIM/10), rclr(), rclr(), rclr())
-	}
-	biCircles = ibtw(0,20)
+		triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/20, DIM/10), rclr(), rclr(), rclr())
+  }
+  remainingMoons -= biCircles;
+	biCircles = ibtw(0,max(18,remainingMoons));
 	for(let i = 0; i < biCircles; i++){
-		triGradientCircle(ibtw(DIM * 1/8.0, DIM * 7/8.0), ibtw(DIM * (1/8.0), DIM * (7/8.0) ), ibtw(DIM/80, DIM/20), rclr(), rclr(), rclr())
+    triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/80, DIM/20), rclr(), rclr(), rclr())
+  }
+  remainingMoons -= biCircles;
+  biCircles = remainingMoons;
+	for(let i = 0; i < biCircles; i++){
+		triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/100, DIM/60), rclr(), rclr(), rclr())
 	}
   if (hasStars) stars();
   if(hasAsteroids) asteroids();
@@ -133,42 +165,24 @@ function rclr(){
 	let idx = ibtw(0, clrs.length);
 	
 	if(idx >= clrs.length || idx <0) return clrs[clrs.length-1];
-	// console.log("rclr idx:", idx)
 	return clrs[ibtw(0, clrs.length)]
 }
 function clr(c, a) {
 	if(!c) return clr(clrs[0],a);
 	return color(red(c), green(c), blue(c), a);
 }
-// function incHash() {
-//   console.log("incHash", hashIdx)
-//   console.log("maxHashIdx", maxHashIdx)
-//   hashIdx++; if (hashIdx > maxHashIdx) hashIdx = minHashIdx;
-// }
 function xx() {
-  // console.log("xx() method");
-              // incHash();
-  // console.log("h:" + hashIdx);
-  // console.log("hash substring: ", hash.substring(hashIdx, hashIdx + 2))
-              // var r = unhex(hash.substring(hashIdx, hashIdx + 2));
-  // console.log("unhexed xx r var: ", r);
   var r = floor(fxrand() * 256)            
   return r
 }
 function x() {
-  // incHash();
   var r = floor(fxrand() * 16);
   return r;
-  // return unhex(hash.substring(hashIdx, hashIdx + 1));
 }
 function ibtw(b, c) {
-    // console.log("abs c-b ", abs(c - b));
     let xxVar = xx();
-    // console.log("xx", xxVar)
 		i = floor(b + (xxVar / 256.0) * abs(c - b))
 	  if(i >= c) return i;
-		// console.log("ibtw inparms: " + (xx()/255.0) + "," + b + "," + c)
-		// console.log("i:" + i)
     return i;
 }
 function fbtw(b, c) {
@@ -187,14 +201,11 @@ function hc(c){
 }
 
 function biGradientCircle(x, y, startRadius, c1, c2, c3) {
-    // console.log("grandient Circle colors: " + c1 + "," + c2 + "," + c3)
 		noStroke()
     let radius = startRadius;
     while (radius-- >= 0) {
-        //println("drawcircle: " + radius);
         let diffa = (radius * 1.0)  / (startRadius * 1.0);
         let c = lerpColor(c1, c2, diffa * diffa);
-			  // console.log(c)
         fill(c);
         circle(x, y, radius);
     }
@@ -207,20 +218,15 @@ function fullGradientCircle(x, y){
 	var bandCount = ibtw(1 * clrs.length, 3 * clrs.length + 1)
 	var bandWidth = int((maxRadius + 5) / bandCount)
 	let r = maxRadius;
-	// console.log("MaxRadius: " + r + ", bandwidth:" + bandWidth + ", numBands" + bandCount + "center: " + x + "," + y)
 	let cidx = 0; 
 	let c1 = clrs[cidx]
 	let c2 = clrs[(cidx+1)%clrs.length]
 	console.log( "c1:" + c1 + "c2" + c2)
 	while (r >= 100){
 		bTally = 0;
-		// console.log("New Band Loop @ " + r)
 		while (bTally <= bandWidth){
 				let diff = bTally/bandWidth
-				// console.log("diff:" + diff + "c1:" + c1 + "c2" + c2)
 				 let c = lerpColor(c1, c2, diff);
-				// console.log("lerped color:" + c + "r:" + r)
-			// console.log(c2)
 				cnv.fill(c)
 				cnv.circle(x, y, r)
 			bTally++;
@@ -230,31 +236,17 @@ function fullGradientCircle(x, y){
 		c1 = clrs[cidx]
 		c2 = clrs[(cidx+1)%clrs.length]
 	}
-	//noise 
-	if(p(.001)) {
-		addNoise(cnv)
-		maskCanvas.circle(x, y, maxRadius)
-		applyMask(cnv, maskCanvas)
-	} else {
-		image(cnv,0,0)
-	}
+  image(cnv,0,0)
 	
-}
-function lightRayGradientSkys(x,y){
-	console.log("TODO")
 }
 
 function triGradientCircle(x, y, startRadius, c1, c2, c3) {
-    // console.log("grandient Circle")
-	// console.log("trigrandient Circle colors: " + c1 + "," + c2 + "," + c3)
 		noStroke()
     let radius = startRadius;
     while (radius >= 0) {
-        //println("drawcircle: " + radius);
         let diffa = (radius * 1.0)  / (startRadius * 1.0);
         let c0 = lerpColor(c1, c2, diffa*diffa);
         let diffb = (radius * 1.0) / (startRadius * 1.0);
-        // let c = lerpColor(c0, c2, diffb);
 				let c = lerpColor(c0, c3, diffb);
         fill(c);
         circle(x, y, radius);
@@ -282,7 +274,6 @@ function sparseBarGradient(){
 }
 
 function barGradient(c1, c2, bandH, yStart){
-	
 	for(let y = yStart; y < yStart+bandH; y++){
 		let diff = min((y - yStart)/bandH, 1);
 		let c = lerpColor(c1, c2, diff)
@@ -290,14 +281,39 @@ function barGradient(c1, c2, bandH, yStart){
 		line(0, y, DIM, y);
 	}
 }
+  // ymin, ymax, wmin, wmax
+function singleSplitGradient(ymin, ymax, wmin, wmax){ 
+  let c1 = rclr();
+  let c2 = rclr();
+  let startY = ibtw(DIM * ymin, DIM * ymax);
+  let currY = startY;
+  let totalH = ibtw(DIM*wmin, DIM*wmax)
+  barGradient(color(0, 0, 0), c1, totalH / 3, currY);
+  currY += totalH / 3;
+  barGradient(c1, c2, totalH / 3, int(currY));
+  currY += totalH / 3;
+  barGradient(c2, color(0, 0, 0), totalH / 3, int(currY));
+}
+
+function doubleSplitGradient(ymin, ymax, wmin, wmax) {
+  let c1 = rclr();
+  let c2 = rclr();
+  let c3 = rclr();
+  let startY = ibtw(DIM * ymin, DIM * ymax);
+  let currY = startY;
+  let totalH = ibtw(DIM*wmin, DIM*wmax)
+  barGradient(color(0, 0, 0), c1, totalH / 4, currY);
+  currY += totalH / 4;
+  barGradient(c1, c2, totalH / 4, int(currY));
+  currY += totalH / 4;
+  barGradient(c2, c3, totalH / 4, int(currY));
+  currY += totalH / 4;
+  barGradient(c3, color(0, 0, 0), totalH / 4, int(currY));
+}
 function skyBandGradient() {
 	strokeWeight(2);
 	bandCount = ibtw(clrs.length, clrs.length*1.5)
-	// bandCount = 3
-	// console.log("bandCount:" + bandCount)
 	bandH = floor(DIM/bandCount)+1;
-	
-	
 	for(var i = 0; i < bandCount; i++){
 		streakGradient(i, bandH, i*bandH)
 	}
@@ -320,12 +336,11 @@ function streakGradient(i, bandH, yStart){
 function stars(){
 
 			var limit = x()*2
-			// console.log("x():" +x())
 			limit *=2
 			points = starPoints[ibtw(0,starPoints.length)]
 			for(var i = 10; i < 10 + limit; i++){
 				radialShape(ibtw(DIM*(1/25), DIM*(24/25)), 
-										ibtw(DIM*(1/25), DIM/2.0), 
+										ibtw(DIM*(1/25), DIM*24/25), 
 										ibtw(DIM/70, DIM/20), 
 										ibtw(DIM/70, DIM/20), 
 										rclr(), rclr(), rclr(), 
@@ -389,17 +404,14 @@ function asteroids(){
 		triangle(xCenter - w, yCenter, xCenter + w, yCenter, xCenter, yCenter + h)
 		fill(lightx < xCenter ? lighten(clrs[m%clrs.length], shadeDiff) : clrs[m%clrs.length]);
 		triangle(xCenter - w, yCenter, xCenter + w, yCenter, xCenter, yCenter - h)
-		// console.log("drawing mid part of triangle")
 		fill(lightx > xCenter ? clrs[m%clrs.length] : darken(clrs[m%clrs.length], shadeDiff));
 		triangle(midx, yCenter, xCenter + w, yCenter, xCenter, yCenter + h)
 		fill(lightx > xCenter ? lighten(clrs[m%clrs.length], shadeDiff) : clrs[m%clrs.length]);
 		triangle(midx, yCenter, xCenter + w, yCenter, xCenter, yCenter - h)
 		yCenter += yInc;
-		// console.log(yCenter)
 	}
 }
 function radialShape(x, y, h, w , c1, c2, c3, points){
-	// console.log("radial Shape w points#:" + points)
 	let startRadians = 0.5;
 	let radialScalars = {"r": 1, 0:1}
 	radialScalars = determineRadialScalars(points);
@@ -612,7 +624,7 @@ function geoFill(n,f,m,altParms){
 }
 }
 function spaceRings(flipBlack, vertex){
-	
+	console.log("spaceRings Function")
 	noFill();
   let lastBlack = true;
 	let [x, y] = vertex;
@@ -629,9 +641,7 @@ function spaceRings(flipBlack, vertex){
 	let currWidth = maxWidth
 	c1 = color(0,0,0)
 	c2 = rclr()
-	// console.log("ellipse gradient: " + x + "," + y + " maxWidth:" + maxWidth)
 	ellipseMode(RADIUS)
-	// console.log("currBandWidth:" + currBandWidth)
 	while(currWidth > minWidth){
 		let diff = (bandCounter)/currBandWidth
  		let c = lerpColor(c1, c2, diff);
