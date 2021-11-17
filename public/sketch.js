@@ -39,17 +39,60 @@ var horizonY; var hasWindow;
 const windowMargin = 11;
 var skewRadialFill; var skewRadialOutline;
 var lightSourceDepth;
-var palettes;
+var palettes; var paletteInx;
+var hasSpaceRing; var spaceRingVertex;
+var hasStars;
+var hasAsteroids;
+var moonHash;
+var moonCount;
+var voidbg;let hasNebulaBands;
 // noprotect
-
-
-function keyPressed() {
-  if (keyCode == 83) {
-    saveCanvas(fxhash, 'png');
-  } 
-}
-function draw() {
-  createCanvas(DIM, DIM);
+function setup() {
+  rare_palettes = [
+    	{'name' : 'Ayahausca Onset', 'colors' : [color("#F4F172"),color("#BEB85A"),color("#89A754"),color("#7D904D"),color("#617E44"),color("#726D35"),color("#3E6E35"),color("#040402"),]},
+		{'name' : 'Platinum', 'colors' : [color("#FFFCDF"),color("#F4E8BE"),color("#9A8F79"),color("#788C97"),color("#60626F"),color("#404040"),color("#212121"),]},
+			{'name' : 'Noble Nebulae', 'colors' : [color("#DFB492"),color("#E5827E"),color("#B58694"),color("#B46C79"),color("#9C576B"),color("#76435D"),color("#276176"),color("#0B253D"),]},
+	  {'name' : 'Summerwood', 'colors' : [color("#E2D894"),color("#E7D56F"),color("#A2833D"),color("#3D8669"),color("#3C7747"),color("#3F3C2D"),color("#1D281A"),color("#070202"),]},
+    {'name' : 'Glacial Glow', 'colors' : [color("#D0FBF2"),color("#A0FBF3"),color("#8282A8"),color("#00D0CD"),color("#0697CC"),color("#077FA8"),]},
+    {'name' : 'Karens Husbands Nightmare', 'colors' : [color("#F0EA91"),color("#A86EA3"),color("#965686"),color("#876355"),color("#78436E"),color("#505680"),color("#3D4260"),color("#612744"),color("#25253C"),]},
+    {'name' : 'Ice Ball', 'colors' : [color("#BD6684"),color("#B4566D"),color("#B34556"),color("#943D42"),color("#374D86"),color("#2D3C70"),color("#2B3754"),color("#49303C"),color("#392B24")]},
+    {'name' : 'Radiation Poisoning', 'colors' : [color("#DFD086"),color("#E3C476"),color("#B7AD73"),color("#B29961"),color("#7D6F38"),color("#555525"),color("#554619"),color("#444D1E"),color("#2C2908"),]},
+	  {'name' : 'Spider Wedding', 'colors' : [color("#8E759C"),color("#7F7A9A"),color("#896392"),color("#7E6F8E"),color("#6F7C8F"),color("#795D85"),color("#815A77"),color("#636D77"),color("#5C617F"),color("#675877"),color("#6F536A"),color("#6A435E"),color("#4C5660"),color("#5A4065"),color("#545051"),color("#553D55"),color("#484757"),color("#4A2F40"),color("#3A2743"),],
+	 'light' : [color("#000000"), color("#FFEAFF"), color("#FFFFFF")]},
+	  ]
+  super_rare_palettes = [
+    {'name' : 'Glory Nebulae', 'colors' : [color("#C1BA9D"),color("#BB7575"),color("#816469"),color("#984454"),color("#3E6278"),color("#374A68"),color("#383254"),color("#280F36"),]},
+	  {'name' : 'Easter', 'colors' : [color("#F6B9DA"),color("#EAB8E4"),color("#F5F29D"),color("#F4C3C8"),color("#F5CFB9"),color("#BBCBF4"),color("#DBAEEF"),color("#A7D9F4"),color("#F5DAA4"),color("#C8BCEF"),color("#D9F1A3"),color("#B0DFD6"),color("#B7EAB7"),color("#BFEFA4"),]},
+    {'name' : 'Gollums Nightmare', 'colors' : [color("#786F49"),color("#645B30"),color("#3C4127"),color("#322F0B"),color("#122826"),color("#151A04"),]},
+  
+  ]
+  ultra_rare_palettes = [
+    {'name' : 'Heaven Song', 'colors' : [color("#E7D4B2"),color("#CA6673"),color("#9E6D87"),color("#796B98"),color("#39819F"),color("#2F556E"),color("#223D4B"),]},
+		
+  ]
+  normie_palettes = [
+    {'name' : 'Regal Song', 'colors' : [color("#B1C9D3"),color("#A0BCD2"),color("#B0A7BA"),color("#847499"),color("#435480"),color("#4B446E"),color("#594659"),]},
+		{'name' : 'Voluptuous Galaxy', 'colors' : [color("#FFFCEC"),color("#FFF1CE"),color("#FFA3AA"),color("#FF8696"),color("#FF707E"),color("#FF458C"),color("#F70059"),color("#A80044"),color("#731D4D"),color("#6B001C"),color("#500D1F"),]},
+	  {'name' : 'Prom Queen', 'colors' : [color("#D2A4B5"),color("#8196AF"),color("#B8425A"),color("#903E64"),color("#6A3C67"),color("#37356A")]},
+	 	{'name' : 'Hawaii', 'colors' : [color("#E9E163"),color("#F4D939"),color("#F68058"),color("#E64093"),color("#C56291"),color("#EE8E2A"),color("#D64C5E"),color("#8C365E"),]},
+    {'name' : 'Spring Bloom', 'colors' : [color("#EFE7E2"),color("#E8B7BD"),color("#D1CA4B"),color("#CE6E81"),color("#8BA84C"),color("#608743"),color("#3A3055"),color("#24211D"),]},
+    {'name' : 'Human Casserole', 'colors' : [color("#E8DDE2"),color("#C4BACE"),color("#4B98B6"),color("#8C845C"),color("#457467"),color("#B8292E"),color("#492B68"),color("#180E1F"),]},
+	  {'name' : 'Celestial Savannah', 'colors' : [color("#E1B658"),color("#F3A326"),color("#C6784A"),color("#E86C22"),color("#A15F3C"),color("#26838A"),color("#8A5C20"),color("#AB141B"),color("#7A2022"),color("#643F15"),color("#284549")]},
+	  {'name' : 'Bachelorette Party', 'colors' : [color("#DEB8DC"),color("#B496CF"),color("#D269A9"),color("#AD53A3"),color("#3F94BF"),color("#E35627"),color("#2E339F"),color("#351A6D"),]},
+    {'name' : 'Polar Reaches', 'colors' : [color("#8EAEC5"),color("#8296B7"),color("#6C7498"),color("#4A6A99"),color("#626381"),color("#465880"),color("#294462"),color("#353648"),color("#1B2445"),color("#0D182A"),color("#150C0D"),],
+	 'light': [color("#A6C3E5"),color("#6288AD"),]},
+		{'name' : 'Mad Hatter', 'colors' : [color("#C48461"),color("#999766"),color("#A69359"),color("#A99A45"),color("#B27759"),color("#8D8963"),color("#978555"),color("#9A8E44"),color("#A67D45"),color("#85795F"),color("#AD6A40"),color("#9A7E35"),color("#806D4D"),color("#A17423"),color("#6D6B5C"),color("#8A7232"),color("#916A25"),color("#7D5C3D"),color("#6C5C4C"),color("#82612B"),color("#6E552C"),color("#7B5419"),color("#8B5500"),color("#67481A"),color("#794B00"),color("#723600"),color("#5D2A00"),color("#2A2A2A"),]},
+	 	{'name' : 'Vegas', 'colors' : [color("#ECDEEE"),color("#FF635B"),color("#E33C74"),color("#D50086"),color("#B20B93"),color("#7A2691"),color("#4633A3"),color("#082178"),color("#020F4B"),]},
+    {'name' : 'Tango Nebulae', 'colors' : [color("#FEFDFD"),color("#FCF0EF"),color("#FDE5E7"),color("#FCD1D2"),color("#FBBEC1"),color("#F6B7B3"),color("#F8ACAE"),color("#82BEB5"),color("#89B8B0"),color("#F6787E"),color("#98A8A2"),color("#F46064"),color("#F15255"),color("#E2585C"),color("#F1464D"),color("#E5414C"),color("#D73E45"),color("#CC3D42"),color("#BB363C"),color("#A83136"),color("#942D2F"),color("#7C2527"),color("#702124"),color("#491517"),color("#391213"),color("#181214"),color("#1A0909"),color("#0B0304"),]},
+    {'name' : 'Queen of Angels', 'colors' : [color("#DBD8F6"),color("#AAD9FB"),color("#BDA2C1"),color("#DB8DB1"),color("#CB7693"),color("#975868"),color("#7F5765"),color("#6C505B")]},
+    {'name' : 'Yeti Taint', 'colors' : [color("#AED7F3"),color("#8AC2DF"),color("#6DB2D9"),color("#59ABD3"),color("#49A4CD"),color("#319BC5"),color("#038AB7"),color("#027CA9"),color("#015F86"),]},
+    {'name' : 'Mirkwood Fungus', 'colors' : [color("#B0B87D"),color("#849680"),color("#6C8657"),color("#7F8918"),color("#506D51"),color("#5D751D"),color("#584139"),color("#304F16"),]},
+    {'name' : 'Hellfire Galaxy', 'colors' : [color("#B75555"),color("#B03C3C"),color("#863835"),color("#653C39"),color("#652520"),color("#3D2016"),color("#0E0B08"),]},
+     {'name' : 'Eastern Galaxy', 'colors' : [color("#FFFFFF"),color("#525464"),color("#6F4355"),color("#494E65"),color("#6F364B"),color("#513D4B"),color("#264558"),]},
+    {'name' : 'Rainforest Galaxy', 'colors' : [color("#F3EDBF"),color("#CDD05E"),color("#53834F"),color("#734566"),color("#31687D"),color("#42432A"),color("#0A0A0C"),]},
+       
+  ]
+createCanvas(DIM, DIM);
   background(0);
 
   palettes = normie_palettes;
@@ -64,35 +107,35 @@ function draw() {
     palettes = normie_palettes;
   }
   
-  var paletteInx = ibtw(0, palettes.length)
+  paletteInx = ibtw(0, palettes.length)
   palette = palettes[paletteInx]
   horizonY = DIM * (2 / 3)
   clrs = palettes[paletteInx]["colors"]
   lightx = ibtw(DIM * 1 / 6.0, DIM * 5 / 6.0); lighty = ibtw(DIM * (1 / 6.0), DIM * (3 / 6.0));
   lightRadiusBounds = [DIM / 6, DIM / 2.75]
-  let hasSpaceRing = p(.66)
-  let spaceRingVertex = [ibtw(0 - DIM / 2, DIM * (3 / 2)), ibtw(0 - 3 * DIM, DIM * 4)]
+  hasSpaceRing = p(.66)
+  spaceRingVertex = [ibtw(0 - DIM / 2, DIM * (3 / 2)), ibtw(0 - 3 * DIM, DIM * 4)]
   skewRadialFill = p(.5);
   skewRadialOutline = p(.5);
   lightSourceDepth = ibtw(1, 4);
-  let hasStars = p(.9);
-  let hasAsteroids = p(.9);
-  let moonHash = fxrand()
-  let moonCount = 0;
+  hasStars = p(.9);
+  hasAsteroids = p(.9);
+  moonHash = fxrand()
+  moonCount = 0;
   if (moonHash < .2) {
     moonCount = 0;
-  } else if (moonHash < .3) { 
+  } else if (moonHash < .35) { 
     moonCount = 1;
-  } else if (moonHash < .6) {
+  } else if (moonHash < .7) {
     moonCount = 7;
-  } else if (moonHash < .8) {
+  } else if (moonHash < .9) {
     moonCount = 19;
   } else {
     moonCount = 37;
   }
-  let voidbg = false;
+  voidbg = false;
   // ymin, ymax, wmin, wmax
-  let hasNebulaBands = false;
+  hasNebulaBands = false;
   if (p(.5)) {
     let hasGrad = false
     if (p(.5)) {
@@ -116,34 +159,46 @@ function draw() {
     sparseBarGradient();
     hasNebulaBands = true;
   } 
-  if (!hasSpaceRing && ! hasNebulaBands) voidbg = true;
-  
-  window.$fxhashFeatures = {
+  if (!hasSpaceRing && !hasNebulaBands) voidbg = true;
+    window.$fxhashFeatures = {
     "Palette": palettes[paletteInx]["name"],
     "Stars": hasStars,
     "Moons": moonCount,
     "Nebula Bands" : hasNebulaBands,
     "Asteroids": hasAsteroids,
-    "Spacerings": hasSpaceRing,
-    "Void" : voidbg
+    "Planet Rings": hasSpaceRing,
+    "Void of Space" : voidbg
   }
-  // console.log(window.$fxhashFeatures)
+}
+
+function keyPressed() {
+  if (keyCode == 83) {
+    saveCanvas(fxhash, 'png');
+  } 
+}
+function draw() {
+  
+  console.log(window.$fxhashFeatures)
   if (hasSpaceRing) spaceRings(p(.5), spaceRingVertex);
-  remainingMoons = moonCount;
-	let biCircles = ibtw(0,max(3,moonCount));
-	for(let i = 0; i < biCircles; i++){
-		triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/20, DIM/10), rclr(), rclr(), rclr())
+  console.log("moonCount", moonCount)
+  if (moonCount > 0) {
+    let remainingMoons = moonCount;
+    let biCircles = ibtw(moonCount,min(3,moonCount));
+    for(let i = 0; i < biCircles; i++){
+      triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/30, DIM/10), rclr(), rclr(), rclr())
+    }
+    remainingMoons -= biCircles;
+    biCircles = ibtw(0,min(10,remainingMoons));
+    for(let i = 0; i < biCircles; i++){
+      triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/80, DIM/30), rclr(), rclr(), rclr())
+    }
+    remainingMoons -= biCircles;
+    biCircles = remainingMoons;
+    for(let i = 0; i < biCircles; i++){
+      triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/100, DIM/75), rclr(), rclr(), rclr())
+    }
+    
   }
-  remainingMoons -= biCircles;
-	biCircles = ibtw(0,max(18,remainingMoons));
-	for(let i = 0; i < biCircles; i++){
-    triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/80, DIM/20), rclr(), rclr(), rclr())
-  }
-  remainingMoons -= biCircles;
-  biCircles = remainingMoons;
-	for(let i = 0; i < biCircles; i++){
-		triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/100, DIM/60), rclr(), rclr(), rclr())
-	}
   if (hasStars) stars();
   if(hasAsteroids) asteroids();
 
@@ -667,50 +722,3 @@ function spaceRings(flipBlack, vertex){
 	}
 }
 
-function setup() {
-  rare_palettes = [
-    	{'name' : 'Ayahausca Onset', 'colors' : [color("#F4F172"),color("#BEB85A"),color("#89A754"),color("#7D904D"),color("#617E44"),color("#726D35"),color("#3E6E35"),color("#040402"),]},
-		{'name' : 'Platinum', 'colors' : [color("#FFFCDF"),color("#F4E8BE"),color("#9A8F79"),color("#788C97"),color("#60626F"),color("#404040"),color("#212121"),]},
-			{'name' : 'Noble Nebulae', 'colors' : [color("#DFB492"),color("#E5827E"),color("#B58694"),color("#B46C79"),color("#9C576B"),color("#76435D"),color("#276176"),color("#0B253D"),]},
-	  {'name' : 'Summerwood', 'colors' : [color("#E2D894"),color("#E7D56F"),color("#A2833D"),color("#3D8669"),color("#3C7747"),color("#3F3C2D"),color("#1D281A"),color("#070202"),]},
-    {'name' : 'Glacial Glow', 'colors' : [color("#D0FBF2"),color("#A0FBF3"),color("#8282A8"),color("#00D0CD"),color("#0697CC"),color("#077FA8"),]},
-    {'name' : 'Karens Husbands Nightmare', 'colors' : [color("#F0EA91"),color("#A86EA3"),color("#965686"),color("#876355"),color("#78436E"),color("#505680"),color("#3D4260"),color("#612744"),color("#25253C"),]},
-    {'name' : 'Ice Ball', 'colors' : [color("#BD6684"),color("#B4566D"),color("#B34556"),color("#943D42"),color("#374D86"),color("#2D3C70"),color("#2B3754"),color("#49303C"),color("#392B24")]},
-    {'name' : 'Radiation Poisoning', 'colors' : [color("#DFD086"),color("#E3C476"),color("#B7AD73"),color("#B29961"),color("#7D6F38"),color("#555525"),color("#554619"),color("#444D1E"),color("#2C2908"),]},
-	  {'name' : 'Spider Wedding', 'colors' : [color("#8E759C"),color("#7F7A9A"),color("#896392"),color("#7E6F8E"),color("#6F7C8F"),color("#795D85"),color("#815A77"),color("#636D77"),color("#5C617F"),color("#675877"),color("#6F536A"),color("#6A435E"),color("#4C5660"),color("#5A4065"),color("#545051"),color("#553D55"),color("#484757"),color("#4A2F40"),color("#3A2743"),],
-	 'light' : [color("#000000"), color("#FFEAFF"), color("#FFFFFF")]},
-	  ]
-  super_rare_palettes = [
-    {'name' : 'Glory Nebulae', 'colors' : [color("#C1BA9D"),color("#BB7575"),color("#816469"),color("#984454"),color("#3E6278"),color("#374A68"),color("#383254"),color("#280F36"),]},
-	  {'name' : 'Easter', 'colors' : [color("#F6B9DA"),color("#EAB8E4"),color("#F5F29D"),color("#F4C3C8"),color("#F5CFB9"),color("#BBCBF4"),color("#DBAEEF"),color("#A7D9F4"),color("#F5DAA4"),color("#C8BCEF"),color("#D9F1A3"),color("#B0DFD6"),color("#B7EAB7"),color("#BFEFA4"),]},
-    {'name' : 'Gollums Nightmare', 'colors' : [color("#786F49"),color("#645B30"),color("#3C4127"),color("#322F0B"),color("#122826"),color("#151A04"),]},
-  
-  ]
-  ultra_rare_palettes = [
-    {'name' : 'Heaven Song', 'colors' : [color("#E7D4B2"),color("#CA6673"),color("#9E6D87"),color("#796B98"),color("#39819F"),color("#2F556E"),color("#223D4B"),]},
-		
-  ]
-  normie_palettes = [
-    {'name' : 'Regal Song', 'colors' : [color("#B1C9D3"),color("#A0BCD2"),color("#B0A7BA"),color("#847499"),color("#435480"),color("#4B446E"),color("#594659"),]},
-		{'name' : 'Voluptuous Galaxy', 'colors' : [color("#FFFCEC"),color("#FFF1CE"),color("#FFA3AA"),color("#FF8696"),color("#FF707E"),color("#FF458C"),color("#F70059"),color("#A80044"),color("#731D4D"),color("#6B001C"),color("#500D1F"),]},
-	  {'name' : 'Prom Queen', 'colors' : [color("#D2A4B5"),color("#8196AF"),color("#B8425A"),color("#903E64"),color("#6A3C67"),color("#37356A")]},
-	 	{'name' : 'Hawaii', 'colors' : [color("#E9E163"),color("#F4D939"),color("#F68058"),color("#E64093"),color("#C56291"),color("#EE8E2A"),color("#D64C5E"),color("#8C365E"),]},
-    {'name' : 'Spring Bloom', 'colors' : [color("#EFE7E2"),color("#E8B7BD"),color("#D1CA4B"),color("#CE6E81"),color("#8BA84C"),color("#608743"),color("#3A3055"),color("#24211D"),]},
-    {'name' : 'Human Casserole', 'colors' : [color("#E8DDE2"),color("#C4BACE"),color("#4B98B6"),color("#8C845C"),color("#457467"),color("#B8292E"),color("#492B68"),color("#180E1F"),]},
-	  {'name' : 'Celestial Savannah', 'colors' : [color("#E1B658"),color("#F3A326"),color("#C6784A"),color("#E86C22"),color("#A15F3C"),color("#26838A"),color("#8A5C20"),color("#AB141B"),color("#7A2022"),color("#643F15"),color("#284549")]},
-	  {'name' : 'Bachelorette Party', 'colors' : [color("#DEB8DC"),color("#B496CF"),color("#D269A9"),color("#AD53A3"),color("#3F94BF"),color("#E35627"),color("#2E339F"),color("#351A6D"),]},
-    {'name' : 'Polar Reaches', 'colors' : [color("#8EAEC5"),color("#8296B7"),color("#6C7498"),color("#4A6A99"),color("#626381"),color("#465880"),color("#294462"),color("#353648"),color("#1B2445"),color("#0D182A"),color("#150C0D"),],
-	 'light': [color("#A6C3E5"),color("#6288AD"),]},
-		{'name' : 'Mad Hatter', 'colors' : [color("#C48461"),color("#999766"),color("#A69359"),color("#A99A45"),color("#B27759"),color("#8D8963"),color("#978555"),color("#9A8E44"),color("#A67D45"),color("#85795F"),color("#AD6A40"),color("#9A7E35"),color("#806D4D"),color("#A17423"),color("#6D6B5C"),color("#8A7232"),color("#916A25"),color("#7D5C3D"),color("#6C5C4C"),color("#82612B"),color("#6E552C"),color("#7B5419"),color("#8B5500"),color("#67481A"),color("#794B00"),color("#723600"),color("#5D2A00"),color("#2A2A2A"),]},
-	 	{'name' : 'Vegas', 'colors' : [color("#ECDEEE"),color("#FF635B"),color("#E33C74"),color("#D50086"),color("#B20B93"),color("#7A2691"),color("#4633A3"),color("#082178"),color("#020F4B"),]},
-    {'name' : 'Tango Nebulae', 'colors' : [color("#FEFDFD"),color("#FCF0EF"),color("#FDE5E7"),color("#FCD1D2"),color("#FBBEC1"),color("#F6B7B3"),color("#F8ACAE"),color("#82BEB5"),color("#89B8B0"),color("#F6787E"),color("#98A8A2"),color("#F46064"),color("#F15255"),color("#E2585C"),color("#F1464D"),color("#E5414C"),color("#D73E45"),color("#CC3D42"),color("#BB363C"),color("#A83136"),color("#942D2F"),color("#7C2527"),color("#702124"),color("#491517"),color("#391213"),color("#181214"),color("#1A0909"),color("#0B0304"),]},
-    {'name' : 'Queen of Angels', 'colors' : [color("#DBD8F6"),color("#AAD9FB"),color("#BDA2C1"),color("#DB8DB1"),color("#CB7693"),color("#975868"),color("#7F5765"),color("#6C505B")]},
-    {'name' : 'Yeti Taint', 'colors' : [color("#AED7F3"),color("#8AC2DF"),color("#6DB2D9"),color("#59ABD3"),color("#49A4CD"),color("#319BC5"),color("#038AB7"),color("#027CA9"),color("#015F86"),]},
-    {'name' : 'Mirkwood Fungus', 'colors' : [color("#B0B87D"),color("#849680"),color("#6C8657"),color("#7F8918"),color("#506D51"),color("#5D751D"),color("#584139"),color("#304F16"),]},
-    {'name' : 'Hellfire Galaxy', 'colors' : [color("#B75555"),color("#B03C3C"),color("#863835"),color("#653C39"),color("#652520"),color("#3D2016"),color("#0E0B08"),]},
-     {'name' : 'Eastern Galaxy', 'colors' : [color("#FFFFFF"),color("#525464"),color("#6F4355"),color("#494E65"),color("#6F364B"),color("#513D4B"),color("#264558"),]},
-    {'name' : 'Rainforest Galaxy', 'colors' : [color("#F3EDBF"),color("#CDD05E"),color("#53834F"),color("#734566"),color("#31687D"),color("#42432A"),color("#0A0A0C"),]},
-       
-  ]
-
-}
