@@ -29,108 +29,195 @@ const minTriangleHeight = 1;
 var horizonY; 
 var palettes; var paletteInx;
 var clrs; var numOrbitals;
-const orbitalOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-var startAngles;
+const orbitalOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+var startAngleOptions;
 var hanging = false;
-var startAngle;
+// var startAngle;
 var gradients = [];
 var scalars = [];
 var orbitals = [];
+var radii = [];
+var startingAngles = [];
 var recursionDepth;
 var gradientFlipIndex;
+var FILO;
+var radialSymmetry;
 
 // noprotect
 function setup() {
-  rare_palettes = [
-    	{'name' : 'Ayahausca Onset', 'colors' : [color("#F4F172"),color("#BEB85A"),color("#89A754"),color("#7D904D"),color("#617E44"),color("#726D35"),color("#3E6E35"),color("#040402"),]},
-		{'name' : 'Platinum', 'colors' : [color("#FFFCDF"),color("#F4E8BE"),color("#9A8F79"),color("#788C97"),color("#60626F"),color("#404040"),color("#212121"),]},
-			{'name' : 'Noble Nebulae', 'colors' : [color("#DFB492"),color("#E5827E"),color("#B58694"),color("#B46C79"),color("#9C576B"),color("#76435D"),color("#276176"),color("#0B253D"),]},
-	  {'name' : 'Summerwood', 'colors' : [color("#E2D894"),color("#E7D56F"),color("#A2833D"),color("#3D8669"),color("#3C7747"),color("#3F3C2D"),color("#1D281A"),color("#070202"),]},
-    {'name' : 'Glacial Glow', 'colors' : [color("#D0FBF2"),color("#A0FBF3"),color("#8282A8"),color("#00D0CD"),color("#0697CC"),color("#077FA8"),]},
-    {'name' : 'Karens Husbands Nightmare', 'colors' : [color("#F0EA91"),color("#A86EA3"),color("#965686"),color("#876355"),color("#78436E"),color("#505680"),color("#3D4260"),color("#612744"),color("#25253C"),]},
-    {'name' : 'Ice Ball', 'colors' : [color("#BD6684"),color("#B4566D"),color("#B34556"),color("#943D42"),color("#374D86"),color("#2D3C70"),color("#2B3754"),color("#49303C"),color("#392B24")]},
-    {'name' : 'Radiation Poisoning', 'colors' : [color("#DFD086"),color("#E3C476"),color("#B7AD73"),color("#B29961"),color("#7D6F38"),color("#555525"),color("#554619"),color("#444D1E"),color("#2C2908"),]},
-	  {'name' : 'Spider Wedding', 'colors' : [color("#8E759C"),color("#7F7A9A"),color("#896392"),color("#7E6F8E"),color("#6F7C8F"),color("#795D85"),color("#815A77"),color("#636D77"),color("#5C617F"),color("#675877"),color("#6F536A"),color("#6A435E"),color("#4C5660"),color("#5A4065"),color("#545051"),color("#553D55"),color("#484757"),color("#4A2F40"),color("#3A2743"),],
-	 'light' : [color("#000000"), color("#FFEAFF"), color("#FFFFFF")]},
-	  ]
-  super_rare_palettes = [
-    {'name' : 'Glory Nebulae', 'colors' : [color("#C1BA9D"),color("#BB7575"),color("#816469"),color("#984454"),color("#3E6278"),color("#374A68"),color("#383254"),color("#280F36"),]},
-	  {'name' : 'Easter', 'colors' : [color("#F6B9DA"),color("#EAB8E4"),color("#F5F29D"),color("#F4C3C8"),color("#F5CFB9"),color("#BBCBF4"),color("#DBAEEF"),color("#A7D9F4"),color("#F5DAA4"),color("#C8BCEF"),color("#D9F1A3"),color("#B0DFD6"),color("#B7EAB7"),color("#BFEFA4"),]},
-    {'name' : 'Gollums Nightmare', 'colors' : [color("#786F49"),color("#645B30"),color("#3C4127"),color("#322F0B"),color("#122826"),color("#151A04"),]},
-  
-  ]
-  ultra_rare_palettes = [
-    {'name' : 'Heaven Song', 'colors' : [color("#E7D4B2"),color("#CA6673"),color("#9E6D87"),color("#796B98"),color("#39819F"),color("#2F556E"),color("#223D4B"),]},
-		
-  ]
-  normie_palettes = [
-    {'name' : 'Regal Song', 'colors' : [color("#B1C9D3"),color("#A0BCD2"),color("#B0A7BA"),color("#847499"),color("#435480"),color("#4B446E"),color("#594659"),]},
-		{'name' : 'Voluptuous Galaxy', 'colors' : [color("#FFFCEC"),color("#FFF1CE"),color("#FFA3AA"),color("#FF8696"),color("#FF707E"),color("#FF458C"),color("#F70059"),color("#A80044"),color("#731D4D"),color("#6B001C"),color("#500D1F"),]},
-	  {'name' : 'Prom Queen', 'colors' : [color("#D2A4B5"),color("#8196AF"),color("#B8425A"),color("#903E64"),color("#6A3C67"),color("#37356A")]},
-	 	{'name' : 'Hawaii', 'colors' : [color("#E9E163"),color("#F4D939"),color("#F68058"),color("#E64093"),color("#C56291"),color("#EE8E2A"),color("#D64C5E"),color("#8C365E"),]},
-    {'name' : 'Spring Bloom', 'colors' : [color("#EFE7E2"),color("#E8B7BD"),color("#D1CA4B"),color("#CE6E81"),color("#8BA84C"),color("#608743"),color("#3A3055"),color("#24211D"),]},
-    {'name' : 'Human Casserole', 'colors' : [color("#E8DDE2"),color("#C4BACE"),color("#4B98B6"),color("#8C845C"),color("#457467"),color("#B8292E"),color("#492B68"),color("#180E1F"),]},
-	  {'name' : 'Celestial Savannah', 'colors' : [color("#E1B658"),color("#F3A326"),color("#C6784A"),color("#E86C22"),color("#A15F3C"),color("#26838A"),color("#8A5C20"),color("#AB141B"),color("#7A2022"),color("#643F15"),color("#284549")]},
-	  {'name' : 'Bachelorette Party', 'colors' : [color("#DEB8DC"),color("#B496CF"),color("#D269A9"),color("#AD53A3"),color("#3F94BF"),color("#E35627"),color("#2E339F"),color("#351A6D"),]},
-    {'name' : 'Polar Reaches', 'colors' : [color("#8EAEC5"),color("#8296B7"),color("#6C7498"),color("#4A6A99"),color("#626381"),color("#465880"),color("#294462"),color("#353648"),color("#1B2445"),color("#0D182A"),color("#150C0D"),],
-	 'light': [color("#A6C3E5"),color("#6288AD"),]},
-		{'name' : 'Mad Hatter', 'colors' : [color("#C48461"),color("#999766"),color("#A69359"),color("#A99A45"),color("#B27759"),color("#8D8963"),color("#978555"),color("#9A8E44"),color("#A67D45"),color("#85795F"),color("#AD6A40"),color("#9A7E35"),color("#806D4D"),color("#A17423"),color("#6D6B5C"),color("#8A7232"),color("#916A25"),color("#7D5C3D"),color("#6C5C4C"),color("#82612B"),color("#6E552C"),color("#7B5419"),color("#8B5500"),color("#67481A"),color("#794B00"),color("#723600"),color("#5D2A00"),color("#2A2A2A"),]},
-	 	{'name' : 'Vegas', 'colors' : [color("#ECDEEE"),color("#FF635B"),color("#E33C74"),color("#D50086"),color("#B20B93"),color("#7A2691"),color("#4633A3"),color("#082178"),color("#020F4B"),]},
-    {'name' : 'Tango Nebulae', 'colors' : [color("#FEFDFD"),color("#FCF0EF"),color("#FDE5E7"),color("#FCD1D2"),color("#FBBEC1"),color("#F6B7B3"),color("#F8ACAE"),color("#82BEB5"),color("#89B8B0"),color("#F6787E"),color("#98A8A2"),color("#F46064"),color("#F15255"),color("#E2585C"),color("#F1464D"),color("#E5414C"),color("#D73E45"),color("#CC3D42"),color("#BB363C"),color("#A83136"),color("#942D2F"),color("#7C2527"),color("#702124"),color("#491517"),color("#391213"),color("#181214"),color("#1A0909"),color("#0B0304"),]},
-    {'name' : 'Queen of Angels', 'colors' : [color("#DBD8F6"),color("#AAD9FB"),color("#BDA2C1"),color("#DB8DB1"),color("#CB7693"),color("#975868"),color("#7F5765"),color("#6C505B")]},
-    {'name' : 'Yeti Taint', 'colors' : [color("#AED7F3"),color("#8AC2DF"),color("#6DB2D9"),color("#59ABD3"),color("#49A4CD"),color("#319BC5"),color("#038AB7"),color("#027CA9"),color("#015F86"),]},
-    {'name' : 'Mirkwood Fungus', 'colors' : [color("#B0B87D"),color("#849680"),color("#6C8657"),color("#7F8918"),color("#506D51"),color("#5D751D"),color("#584139"),color("#304F16"),]},
-    {'name' : 'Hellfire Galaxy', 'colors' : [color("#B75555"),color("#B03C3C"),color("#863835"),color("#653C39"),color("#652520"),color("#3D2016"),color("#0E0B08"),]},
-     {'name' : 'Eastern Galaxy', 'colors' : [color("#FFFFFF"),color("#525464"),color("#6F4355"),color("#494E65"),color("#6F364B"),color("#513D4B"),color("#264558"),]},
-    {'name' : 'Rainforest Galaxy', 'colors' : [color("#F3EDBF"),color("#CDD05E"),color("#53834F"),color("#734566"),color("#31687D"),color("#42432A"),color("#0A0A0C"),]},
-       
-  ]
-  createCanvas(DIM, DIM);
+	save_palettes = [
+		{'name' : 'dreamingcity', 'colors' : [color("#E89B38"),color("#5CA3A6"),color("#020106"),]},
+		{'name' : 'solaris', 'colors' : [color("#F1DFBD"),color("#EBD048"),color("#599891"),color("#6D9E3D"),color("#5D487A"),]},
+		{'name' : 'spaceChristmasIIIIII', 'colors' : [color("#F5CAA3"),color("#F6B8AA"),color("#F698A5"),color("#F1899A"),color("#EA6D97"),color("#A05585"),color("#873C5F"),color("#3D2532"),]},
+		{'name' : 'spectrumIII', 'colors' : [color("#DFB492"),color("#B46C79"),color("#76435D"),color("#276176"),color("#0B253D"),]},
+		{'name' : 'timeslipIIIV', 'colors' : [color("#D0AB70"),color("#D08826"),color("#CB4855"),color("#B92424"),color("#280A00"),]},
+		{'name' : 'twilightsnowI', 'colors' : [color("#F5963A"),color("#F5772F"),color("#F65D2C"),color("#EA4E2A"),color("#936F47"),color("#74613F"),color("#764941"),color("#64423D"),color("#3D2335"),]},
+		   {'name' : 'Orange', 'colors' : [color("#D4BC9D"),color("#E73B20"),color("#140F01"),]},
+		   {'name' : 'spaceChristmasIII', 'colors' : [color("#F3D0A7"),color("#F1899A"),color("#A05585"),color("#873C5F"),color("#3D2532"),]},
+		   {'name' : 'squares', 'colors' : [color("#92914C"),color("#6E6F67"),color("#92801A"),color("#933513"),]},
+		   {'name' : 'spacestationpIIII', 'colors' : [color("#EBC5DD"),color("#C297CC"),color("#52B5CE"),color("#4A3D7B"),]},
+		   {'name' : 'timeslipIIII', 'colors' : [color("#F5C5A9"),color("#D0942A"),color("#C65661"),color("#C53C55"),color("#B9293C"),color("#6F2825"),]},
+		   {'name' : 'winternnI', 'colors' : [color("#E89B4A"),color("#E47A3D"),color("#D35635"),color("#4C4E41"),color("#3E3138"),color("#2B1415"),]},
+		   {'name' : 'Spring Pastel', 'colors' : [color("#B9A955"),color("#C1552F"),color("#727B2B"),color("#4B5E20"),]},
+		   {'name' : 'Spring Pastel II', 'colors' : [color("#CDA755"),color("#9C8F3D"),color("#C1552F"),color("#4B5E20"),color("#19240B"),]},
+		   {'name' : 'Plum', 'colors' : [color("#E9D8CB"),color("#D0B3B7"),color("#B78299"),color("#A76886"),color("#7F4C6C"),color("#5F3755"),color("#31242A"),]},
+		   {'name' : 'RisforrocketIIIIVUI', 'colors' : [color("#D26E7B"),color("#D14253"),color("#C91532"),color("#88303C"),color("#35110F"),]},
+		   {'name' : 'moonpoolIIIVI', 'colors' : [color("#BF9FB2"),color("#BFB287"),color("#94627E"),color("#4B7E82"),color("#54697B"),color("#3C2834"),]},
+		   {'name' : 'Space Flamingo', 'colors' : [color("#EA9CB7"),color("#936DA6"),color("#BE5567"),color("#250000"),]},
+		   {'name' : 'lovetunnelII', 'colors' : [color("#C8A072"),color("#A51830"),color("#991418"),color("#62222F"),]},
+		   {'name' : 'volcanoIII', 'colors' : [color("#D68644"),color("#D03D67"),color("#D15932"),color("#AE5624"),color("#C73525"),color("#672834"),color("#1B0B11"),]},
+		   {'name' : 'spectrum', 'colors' : [color("#DFB492"),color("#E5827E"),color("#B58694"),color("#B46C79"),color("#9C576B"),color("#76435D"),color("#276176"),color("#0B253D"),]},
+		   {'name' : 'timeslipIIIII', 'colors' : [color("#F5C5A9"),color("#C65661"),color("#C53C55"),color("#B92936"),color("#6F2825"),]},
+		   {'name' : 'Island Sunset', 'colors' : [color("#F58473"),color("#D3B051"),color("#F5763F"),color("#E73B20"),]},
+		   {'name' : 'earth2moonIIIVI', 'colors' : [color("#E1CC7B"),color("#933043"),color("#6E333F"),color("#83282D"),color("#3A2630"),]},
+		   {'name' : 'Radiation Poisoning', 'colors' : [color("#DFD086"),color("#E3C476"),color("#B7AD73"),color("#B29961"),color("#7D6F38"),color("#555525"),color("#554619"),color("#444D1E"),color("#2C2908"),]},
+		   {'name' : 'Regal Song', 'colors' : [color("#B1C9D3"),color("#A0BCD2"),color("#B0A7BA"),color("#847499"),color("#435480"),color("#4B446E"),color("#594659"),]},
+		   {'name' : 'Voluptuous Galaxy', 'colors' : [color("#FFFCEC"),color("#FFF1CE"),color("#FFA3AA"),color("#FF8696"),color("#FF707E"),color("#FF458C"),color("#F70059"),color("#A80044"),color("#731D4D"),color("#6B001C"),color("#500D1F"),]},
+		   {'name' : 'Pale Night', 'colors' : [color("#BAB286"),color("#9F9D81"),color("#6A6C65"),color("#041217"),]},
+		   {'name' : 'Hawaii', 'colors' : [color("#E9E163"),color("#F4D939"),color("#F68058"),color("#E64093"),color("#C56291"),color("#EE8E2A"),color("#D64C5E"),color("#8C365E"),]},
+		   {'name' : 'Spring Bloom', 'colors' : [color("#EFE7E2"),color("#E8B7BD"),color("#D1CA4B"),color("#CE6E81"),color("#8BA84C"),color("#608743"),color("#3A3055"),color("#24211D"),]},
+		   {'name' : 'Prime', 'colors' : [color("#F4CE9C"),color("#64A3AC"),color("#286E84"),color("#961412"),color("#65060A"),]},
+		   //    {'name' : 'Other Realm', 'colors' : [color("#E79749"),color("#E47A3D"),color("#D35635"),color("#AD5535"),color("#7C5644"),color("#515346"),color("#6B4A2E"),color("#503528"),color("#362624"),]},
+		   // {'name' : 'Yeti Taint', 'colors' : [color("#AED7F3"),color("#8AC2DF"),color("#6DB2D9"),color("#59ABD3"),color("#49A4CD"),color("#319BC5"),color("#038AB7"),color("#027CA9"),color("#015F86"),]},
+		   {'name' : 'Royal', 'colors' : [color("#E2D396"),color("#325F98"),color("#58296D"),color("#140B04"),]},
+		   {'name' : 'Bachelorette Party', 'colors' : [color("#DEB8DC"),color("#B496CF"),color("#D269A9"),color("#AD53A3"),color("#3F94BF"),color("#E35627"),color("#2E339F"),color("#351A6D"),]},
+		   {'name' : 'Queen of Angels', 'colors' : [color("#DBD8F6"),color("#AAD9FB"),color("#BDA2C1"),color("#DB8DB1"),color("#CB7693"),color("#975868"),color("#7F5765"),color("#6C505B")]},
+		   {'name' : 'Hellfire Galaxy', 'colors' : [color("#B75555"),color("#B03C3C"),color("#863835"),color("#653C39"),color("#652520"),color("#3D2016"),color("#0E0B08"),]},
+		      {'name' : 'Ancient Moons', 'colors' : [color("#BF9B71"),color("#AE8455"),color("#B75555"),color("#B03C3C"),color("#652520"),color("#0E0B08"),]},
+			  {'name' : 'Fertile Forest', 'colors' : [color("#E9E18E"),color("#3B967F"),color("#008864"),color("#25331D"),]},
+			]
+			rare_palettes = [
+				{'name' : 'Noble Nebulae', 'colors' : [color("#DFB492"),color("#E5827E"),color("#B58694"),color("#B46C79"),color("#9C576B"),color("#76435D"),color("#276176"),color("#0B253D"),]},
+				{'name' : 'Spider Wedding', 'colors' : [color("#8E759C"),color("#7F7A9A"),color("#896392"),color("#7E6F8E"),color("#6F7C8F"),color("#795D85"),color("#815A77"),color("#636D77"),color("#5C617F"),color("#675877"),color("#6F536A"),color("#6A435E"),color("#4C5660"),color("#5A4065"),color("#545051"),color("#553D55"),color("#484757"),color("#4A2F40"),color("#3A2743"),],
+				'light' : [color("#000000"), color("#FFEAFF"), color("#FFFFFF")]},
+				{'name' : 'Heaven Song', 'colors' : [color("#E7D4B2"),color("#CA6673"),color("#9E6D87"),color("#796B98"),color("#39819F"),color("#2F556E"),color("#223D4B"),]},
+				{'name' : 'Baby', 'colors' : [color("#DEB8DC"),color("#B799CF"),color("#D269A9"),color("#3F94BF"),color("#3D4BB8"),]},
+				
+				//. {'name' : 'Karens Husbands Nightmare', 'colors' : [color("#F0EA91"),color("#A86EA3"),color("#965686"),color("#876355"),color("#78436E"),color("#505680"),color("#3D4260"),color("#612744"),color("#25253C"),]},
+				//x {'name' : 'Summerwood', 'colors' : [color("#E2D894"),color("#E7D56F"),color("#A2833D"),color("#3D8669"),color("#3C7747"),color("#3F3C2D"),color("#1D281A"),color("#070202"),]},
+				//. {'name' : 'Glacial Glow', 'colors' : [color("#D0FBF2"),color("#A0FBF3"),color("#8282A8"),color("#00D0CD"),color("#0697CC"),color("#077FA8"),]},
+				//x {'name' : 'Ice Ball', 'colors' : [color("#BD6684"),color("#B4566D"),color("#B34556"),color("#943D42"),color("#374D86"),color("#2D3C70"),color("#2B3754"),color("#49303C"),color("#392B24")]},
+				//x {'name' : 'Platinum', 'colors' : [color("#FFFCDF"),color("#F4E8BE"),color("#9A8F79"),color("#788C97"),color("#60626F"),color("#404040"),color("#212121"),]},
+				//. {'name' : 'Celestial Savannah', 'colors' : [color("#E1B658"),color("#F3A326"),color("#C6784A"),color("#E86C22"),color("#A15F3C"),color("#26838A"),color("#8A5C20"),color("#AB141B"),color("#7A2022"),color("#643F15"),color("#284549")]},
+				//. {'name' : 'Bloom Nebula', 'colors' : [color("#F5D18B"),color("#00806F"),color("#005859"),color("#520027"),]},
+			]
+			super_rare_palettes = [
+				//x {'name' : 'Glory Nebulae', 'colors' : [color("#C1BA9D"),color("#BB7575"),color("#816469"),color("#984454"),color("#3E6278"),color("#374A68"),color("#383254"),color("#280F36"),]},
+				{'name' : 'Easter', 'colors' : [color("#F6B9DA"),color("#EAB8E4"),color("#F5F29D"),color("#F4C3C8"),color("#F5CFB9"),color("#BBCBF4"),color("#DBAEEF"),color("#A7D9F4"),color("#F5DAA4"),color("#C8BCEF"),color("#D9F1A3"),color("#B0DFD6"),color("#B7EAB7"),color("#BFEFA4"),]},
+				{'name' : 'Firebird', 'colors' : [color("#EDD89E"),color("#DEA023"),color("#F5191D"),color("#0F0C0C"),]},
+				//x {'name' : "Gollum's Pool", 'colors' : [color("#8b8155"),color("#a59750"),color("#5e663d"),color("#322f0b"),color("#151a04"),color("#1b6c75"),]},
+				//x {'name' : 'Vampire', 'colors' : [color("#C11218"),color("#170001"),]},
+				
+			]
+			ultra_rare_palettes = [
+				{'name' : 'Mellow Nebulae', 'colors' : [color("#DFB492"),color("#E5827E"),color("#B46C79"),color("#76435D"),color("#276176"),color("#0B253D"),]},
+				
+			]
+			normie_palettes = [
+				{'name' : 'Mad Hatter', 'colors' : [color("#C48461"),color("#999766"),color("#A69359"),color("#A99A45"),color("#B27759"),color("#8D8963"),color("#978555"),color("#9A8E44"),color("#A67D45"),color("#85795F"),color("#AD6A40"),color("#9A7E35"),color("#806D4D"),color("#A17423"),color("#6D6B5C"),color("#8A7232"),color("#916A25"),color("#7D5C3D"),color("#6C5C4C"),color("#82612B"),color("#6E552C"),color("#7B5419"),color("#8B5500"),color("#67481A"),color("#794B00"),color("#723600"),color("#5D2A00"),color("#2A2A2A"),]},
+				{'name' : 'Gemstone Nebulae', 'colors' : [color("#F1DCC0"),color("#C43055"),color("#009FA2"),color("#492148"),]},
+				{'name' : 'Rainforest Galaxy', 'colors' : [color("#F3EDBF"),color("#CDD05E"),color("#53834F"),color("#734566"),color("#31687D"),color("#42432A"),color("#0A0A0C"),]},
+				{'name' : 'Moon', 'colors' : [color("#C2BDB0"),color("#868079"),color("#443E3E"),color("#3E3D31"),color("#040302"),]},
+				{'name' : 'Stardust', 'colors' : [color("#E5827E"),color("#153D56"),color("#0B253D"),]},
+				{'name' : 'Sugar', 'colors' : [color("#E3909F"),color("#C7829F"),color("#A25686"),color("#5F7F96"),color("#3B2733"),]},
+				{'name' : 'Neptune', 'colors' : [color("#519FB7"),color("#6D3E93"),color("#0D6D99"),color("#374187"),color("#4F1F7F"),color("#0F3277"),color("#0B1A0B"),]},
+				{'name' : 'Insects', 'colors' : [color("#DEA53D"),color("#2A6448"),color("#375524"),]},
+				{'name' : 'Yeti Taint', 'colors' : [color("#D5C5AA"),color("#6D9FB3"),color("#258AB3"),color("#264C6D"),]},
+				{'name' : 'Soul Shambles', 'colors' : [color("#929255"),color("#927F19"),color("#933513"),color("#7D3113"),color("#1C1D13"),]},
+				
+				//.    {'name' : 'Swamp Glow', 'colors' : [color("#DE8657"),color("#739F6D"),color("#548A68"),color("#3D4E52"),color("#2A2D37"),color("#171A24"),]},
+				//.   {'name' : 'Wolverine', 'colors' : [color("#EBD048"),color("#C5BE42"),color("#599891"),color("#4D7E6E"),color("#23250F"),]},
+				//. {'name' : 'Mirkwood Fungus', 'colors' : [color("#B0B87D"),color("#849680"),color("#6C8657"),color("#7F8918"),color("#506D51"),color("#5D751D"),color("#584139"),color("#304F16"),]},
+				//. {'name' : 'Polar Reaches', 'colors' : [color("#8EAEC5"),color("#8296B7"),color("#6C7498"),color("#4A6A99"),color("#626381"),color("#465880"),color("#294462"),color("#353648"),color("#1B2445"),color("#0D182A"),color("#150C0D"),],
+				//. {'name' : 'Eastern Galaxy', 'colors' : [color("#FFFFFF"),color("#525464"),color("#6F4355"),color("#494E65"),color("#6F364B"),color("#513D4B"),color("#264558"),]},
+				//. {'name' : 'Iron Planet', 'colors' : [color("#BD9E86"),color("#DC322B"),color("#111114"),]},
+				//.  'light': [color("#A6C3E5"),color("#6288AD"),]},
+				//.   {'name' : 'Prom Queen', 'colors' : [color("#D2A4B5"),color("#8196AF"),color("#B8425A"),color("#903E64"),color("#6A3C67"),color("#37356A")]},
+				//x {'name' : 'Neptune', 'colors' : [color("#3682AD"),color("#3187AA"),color("#6D3E93"),color("#5B388E"),color("#0D6D99"),color("#374187"),color("#0B6091"),color("#274B85"),color("#4F1F7F"),color("#3F1F7F"),color("#10427C"),color("#0F3277"),color("#0F2674"),]},
+				//x {'name' : 'Human Casserole', 'colors' : [color("#E8DDE2"),color("#C4BACE"),color("#4B98B6"),color("#8C845C"),color("#457467"),color("#B8292E"),color("#492B68"),color("#180E1F"),]},
+				//x    {'name' : 'Colour out of Space', 'colors' : [color("#E7CF9F"),color("#52807D"),color("#69394B"),]},
+				//x {'name' : 'Tango Nebulae', 'colors' : [color("#FEFDFD"),color("#FCF0EF"),color("#FDE5E7"),color("#FCD1D2"),color("#FBBEC1"),color("#F6B7B3"),color("#F8ACAE"),color("#82BEB5"),color("#89B8B0"),color("#F6787E"),color("#98A8A2"),color("#F46064"),color("#F15255"),color("#E2585C"),color("#F1464D"),color("#E5414C"),color("#D73E45"),color("#CC3D42"),color("#BB363C"),color("#A83136"),color("#942D2F"),color("#7C2527"),color("#702124"),color("#491517"),color("#391213"),color("#181214"),color("#1A0909"),color("#0B0304"),]},
+	]
+	gchain_palettes = [
+	]
+	createCanvas(DIM, DIM);
 //   background(200);
 
   palettes = normie_palettes;
-  let paletteTier = fxrand();
-  if (paletteTier <= 0.01) {
+	let paletteTier = fxrand();
+	let ULTRA = 0.01; //.01
+	let SUPER = 0.04; //.04
+	let RARE = 0.15; //.14
+  if (paletteTier <= ULTRA) {
     palettes = ultra_rare_palettes;
-  } else if (paletteTier <= 0.04) {
+  } else if (paletteTier <= SUPER) {
     palettes = super_rare_palettes;
-  } else if (paletteTier <= .14) {
+  } else if (paletteTier <= RARE) {
     palettes = rare_palettes;
   } else {
     palettes = normie_palettes;
   }
+//   palettes = ultra_rare_palettes;
+//   palettes = super_rare_palettes;
+//   palettes = rare_palettes;
+//   palettes = normie_palettes;
+	// palettes = gchain_palettes;
   
 	paletteInx = ibtw(0, palettes.length)
 	palette = palettes[paletteInx]
 	console.log("palette", palette)
 	clrs = palettes[paletteInx]["colors"]
-	bgColor = rclr();
-	background(bgColor);
+	// bgColor = rclr();
+	bgColorIdx = ibtw(0, clrs.length)
+	spaceMode = p(.2);
+	let removeBackground = !spaceMode && p(.5);
+	background(spaceMode ? 0 : darken(clrs[bgColorIdx], 5));
+	if (!spaceMode && removeBackground) {
+		clrs.splice(bgColorIdx, 1)
+	}
 	const moonHash = fxrand()//
 	
 	hanging = p(.5);
 	gradientFlipIndex = ibtw(0,3);
-	startAngles = [0, PI / 2, PI, 3 * PI / 2];
+	startAngleOptions = [0, PI / 2, PI, 3 * PI / 2];
 	extraFourthAngles = [PI/4, 3*PI/4, 5*PI/4, 7*PI/4];
 	extraEightAngles = [PI/8, 3*PI/8, 5*PI/8, 7*PI/8, 9*PI/8, 11*PI/8, 13*PI/8, 15*PI/8];
-	startAngles.push.apply(startAngles,extraFourthAngles);
-	startAngles.push.apply(startAngles, extraEightAngles);
-	console.log("startAngles", startAngles)
-	startAngle = startAngles[ibtw(0, startAngles.length)];
-	recursionDepth = 3;
+	startAngleOptions.push.apply(startAngleOptions,extraFourthAngles);
+	startAngleOptions.push.apply(startAngleOptions, extraEightAngles);
+	console.log("startAngles", startAngleOptions)
+	startingAngles.push(startAngleOptions[ibtw(0, startAngleOptions.length)]);
+	recursionDepth = 4;
+	if (p(.1)) {
+		recursionDepth = 2;
+	} else if (p(.33)) {
+		recursionDepth = 3;
+	}
+	let orbitalsPattern = ""
+	let matchRadii = p(.5);
+	let uniformAngle = p(.33);
+	
+	radialSymmetry = p(.10);
+	FILO = p(.5);
 	for (let i = 0; i < recursionDepth; i++) {
 		scalars.push(fbtw(.1, .6));
-		orbitals.push(orbitalOptions[ibtw(0,orbitalOptions.length)]);
+		radii.push(matchRadii ? scalars[-1] : fbtw(.1, .6));
+		orbitals.push(orbitalOptions[ibtw(0, orbitalOptions.length)]);
+		startingAngles.push(uniformAngle ? startingAngles[0] : startAngleOptions[ibtw(0, startAngleOptions.length)]);
 	}
-	console.log("orbitals: ", orbitals);
-	// console.log("scalars: ", scalars);
+	for (let i = 0; i < orbitals.length; i++) {
+		orbitalsPattern += orbitals[i]
+		if(i < orbitals.length - 1) {
+			orbitalsPattern += "-"
+		}
+	}
 
-  	// ymin, ymax, wmin, wmax
-	// if (p(.5)) {
-//   if (!hasSpaceRing && !hasNebulaBands) voidbg = true;
-  	window.$fxhashFeatures = {
-		"Mode": hanging ? "Suspended" : "Floating"
-
+	window.$fxhashFeatures = {
+		"Palette" : palettes[paletteInx]["name"],
+		// "Mode": hanging ? "Suspended" : "Floating",
+		"Space Mode": spaceMode ? "Space" : "Sky",
+		"Orbital Pattern": orbitalsPattern,
+		"Recusion Depth": int(recursionDepth),
+		"Radial Symmetry": radialSymmetry ? "Yes" : "No",
   	}	
 }
 
@@ -144,43 +231,48 @@ function draw() {
 	gradients.push(ringGradient());
 	gradients.push(ringGradient());
 	gradients.push(ringGradient());
-	console.log("gradient created");
 	// image(gradients[0], 0, 0, DIM, DIM);
-	console.log("image drawn");
 	console.log(window.$fxhashFeatures)
 	mask = getMask(DIM);
 	let center = [DIM / 2, DIM / 2]
-	let rad = DIM / 3
+	let rad = DIM / ibtw(2, 6);
 	mask.circle(center[0],center[1],rad);
-	applyMask(gradients[0], mask);
-	console.log("recursionDepth in Draw: ", recursionDepth);
-	console.log("starting with ", scalars[recursionDepth-1])
-	drawOrbitals(startAngle, center, rad,  recursionDepth);
+	// console.log("recursionDepth in Draw: ", recursionDepth);
+	// console.log("starting with ", scalars[recursionDepth - 1])
+	if(!FILO) applyMask(gradients[0], mask);
+	drawOrbitals(startingAngles[0], center, rad, recursionDepth);
+	if(FILO) applyMask(gradients[0], mask);
 
   noLoop();
 }
 
-function drawOrbitals(_startAngle, _center, _rad, _n) {
-	if(_n<=0) return;
-	// console.log("numOrbitals", _n);
-	// console.log("scalars[_n]", scalars[_n])
-	var currAngle = _startAngle;
+function drawOrbitals(parentAngle, _center, _rad, _n) {
+	if (_n <= 0) return;
+	var currAngle = radialSymmetry ?  parentAngle : startingAngles[_n - 1];
 	var rotationRadians = (PI * 2) / orbitals[_n-1];
 	
 	for (let o = 0; o < orbitals[_n-1]; o++) {
-		// console.log("Orbaital", o, " of ", _n);
 		let ox = _center[0] + _rad * cos(currAngle);
 		let oy = _center[1] + _rad * sin(currAngle);
-		// console.log("_rad * scalars[_n]", (_rad * scalars[_n-1]));
-		let orad = _rad * scalars[_n-1]
-		let omask = getMask(DIM);
-		// console.log("ox: ", ox, " oy:", oy, " orad:", orad);
-		omask.circle(ox, oy, orad);
-		gIdx = _n % 2 == 1 ? gradientFlipIndex : 1;
-		applyMask(gradients[gIdx], omask);
-		currAngle += rotationRadians;
+		let orad = _rad * scalars[_n - 1]
+		let gIdx = _n % 2 == 1 ? gradientFlipIndex : 1;
 		let newCenter = [ox, oy];
-		drawOrbitals( _startAngle, newCenter, orad, _n - 1);
+		if (!FILO) drawSingleOrbital(orad, newCenter, gIdx);
+		drawOrbitals(currAngle, newCenter, orad, _n - 1);
+		if (FILO) drawSingleOrbital(orad, newCenter, gIdx);
+		currAngle += rotationRadians;
+	}
+}
+function drawSingleOrbital(orad, _center, _gIdx) {
+	let [ox, oy] = _center;
+	if (orad < 20) {
+		noStroke();
+		fill(gradients[_gIdx].get(ox, oy));
+		circle(ox, oy, orad)
+	} else {
+		let omask = getMask(DIM);
+		omask.circle(ox, oy, orad);
+		applyMask(gradients[_gIdx], omask);
 	}
 }
 function getMask(DIM) {
@@ -197,7 +289,8 @@ function ringGradient() {
 	// console.log("gradient vertex", vertex)
 	let startRadius = DIM * 2.75;
 	// console.log("startRadius", startRadius)
-	let ringWidth = floor(DIM / numRings)*ibtw(1, 8);
+	let ringWidth = floor(DIM / numRings) * ibtw(1, 6);
+	ringWidth = min(DIM/3, ringWidth);
 	// console.log("ringWidth", ringWidth)
 	let currRadius = startRadius;
 	gradientCanvas.noStroke();
@@ -329,35 +422,7 @@ function triGradientCircle(x, y, startRadius, c1, c2, c3) {
         radius--;
     }
 }
-function skyBand() {
-	noStroke();
-	bandCount = ibtw(1, clrs.length)
-	bandH = DIM/bandCount;
-	for(var i = 0; i < bandCount; i++){
-		fill(clrs[i]);
-		rect(0,i*bandH -1,DIM, (i+1)*bandH + 1);
-	}
-}
-function sparseBarGradient(){
-	bandH = DIM/clrs.length/2;
-	currY = 0;
-	for(let i = 0; i < clrs.length; i++){
-		barGradient(color(0,0,0), clrs[i], bandH, currY);
-		currY += bandH;
-		barGradient(clrs[i], color(0,0,0), bandH, currY);
-		currY += bandH;
-	}
-}
 
-function barGradient(c1, c2, bandH, yStart){
-	for(let y = yStart; y < yStart+bandH; y++){
-		let diff = min((y - yStart)/bandH, 1);
-		let c = lerpColor(c1, c2, diff)
-		stroke(c);
-		line(0, y, DIM, y);
-	}
-}
-  // ymin, ymax, wmin, wmax
 function singleSplitGradient(ymin, ymax, wmin, wmax){ 
   let c1 = rclr();
   let c2 = rclr();
@@ -386,322 +451,6 @@ function doubleSplitGradient(ymin, ymax, wmin, wmax) {
   currY += totalH / 4;
   barGradient(c3, color(0, 0, 0), totalH / 4, int(currY));
 }
-function skyBandGradient() {
-	strokeWeight(2);
-	bandCount = ibtw(clrs.length, clrs.length*1.5)
-	bandH = floor(DIM/bandCount)+1;
-	for(var i = 0; i < bandCount; i++){
-		streakGradient(i, bandH, i*bandH)
-	}
-}
-function streakGradient(i, bandH, yStart){
-	for(var y = yStart; y <= yStart+bandH; y++){
-		let diff = min((y - yStart)/bandH, 1);
-		let i1 = i%clrs.length
-		if(p(.05)){
-			let c = lerpColor(clrs[i1], clrs[(i1+1)%clrs.length], diff)
-			stroke(c);
-		} else {
-			let c = lerpColor(clrs[i1], color(0,0,0), diff)
-			stroke(c);
-		}
-		
-		line(0, y, DIM, y);
-	} 
-}
 
-function lightSource(){
-	let lc1, lc2, lc3
-	if("light" in palette){
-		lc1 = palette["light"][0];
-		lc2 = (palette["light"].length > 1) ? palette["light"][1] : lc1;
-		lc3 = (palette["light"].length > 2) ? palette["light"][2] : lc2;
-	} else {
-		lc1 = rclr(); lc2 = rclr(); lc3 = rclr()
-	}
-	lightRadius = ibtw(lightRadiusBounds[0], lightRadiusBounds[1])
-	
-	let base = (p(0.5) ? geoFills[ibtw(0, geoFills.length)]:modeSplitters[ibtw(0, modeSplitters.length)])
-	let multiplier = ibtw(3, 80)
-	let points =  multiplier*base
-			radialShape(lightx, lighty, 
-										lightRadius, 
-										lightRadius, 
-										lc2, lc1, lc3, 
-										points
-			);
-			if(lightSourceDepth >= 2) {
-				radialShape(lightx, lighty, 
-										lightRadius * .5, 
-										lightRadius * .5, 
-										lc2, lc1, lc3, 
-										points
-				);
-				if(lightSourceDepth >= 3){
-					radialShape(lightx, lighty, 
-						lightRadius * .15, 
-						lightRadius * .15, 
-						lc2, lc1, lc3, 
-						points
-				);
-				}
-			}
-			
-}
 
-function radialShape(x, y, h, w , c1, c2, c3, points){
-	let startRadians = 0.5;
-	let radialScalars = {"r": 1, 0:1}
-	radialScalars = determineRadialScalars(points);
-	lineScale = fbtw(0.33, 2)
-	
-	if(p(.95)){
-		strokeWeight(1)
-		stroke(clr(c1, 255))
-		for(let i = 0; i < points; i++){
-			let m = 2/points * i
-			let radians = (startRadians + (2/points * i))
-			if (radians >= 2) radians -= 2
-			let currh = h;
-			if(radialScalars[i % radialScalars["r"]] == 0) continue;
-			currh = floor( currh * radialScalars[i % radialScalars["r"]])
-			if(currh < minTriangleHeight) continue;
-			circularLines(x, y, currh, radians * PI)
-		}
-	}
-	//triangle fill
-	let skipFill = true;
-	noStroke()
-	let trianglesToDraw = []
-	fill(clr(c2, 100))
-	if(p(.95)){
-		skipFill = false;
-		for(let i = 0; i < points; i++){
-			let m = 2/points * i
-			let radians = (startRadians + (2/points * i))
-			if (radians >= 2) radians -= 2
-			let currh = h;
-			if(radialScalars[i % radialScalars["r"]] == 0) continue;
-			currh = floor(currh * radialScalars[i % radialScalars["r"]])
-			if(currh < minTriangleHeight) continue;
-			trianglesToDraw.push([int(random(30,100)), [x,y,w,currh,radians*PI]])
-			}
-			let sortedArray = trianglesToDraw.sort(function(a, b) {
-  			return b[0] - a[0];
-			});
-			for(let idx = 0; idx < sortedArray.length; idx++){
-				let arr = sortedArray[idx][1]
-				if(skewRadialFill) fill(clr(rclr(),sortedArray[idx][0]));
-				if(arr[3] < minTriangleHeight) continue;
-				rotateTriangle(arr[0], arr[1], arr[2], arr[3], arr[4]);
-			}
-		}
-	
-	// Triangle Outline
-	if(skipFill || p(.70)){
-		noFill()
-		strokeWeight(1)
-		stroke(clr(c3, 255))
-		let outlinesToDraw = []
-		for(let i = 0; i < points; i++){
-			let m = 2/points * i
-			let radians = (startRadians + (2/points * i))
-			if (radians >= 2) radians -= 2
-			let currh = floor(h* radialScalars[i % radialScalars["r"]])
-			if(radialScalars[i % radialScalars["r"]] == 0) continue;
-			if(currh == 0) continue;
-			if(skewRadialOutline) stroke(clr(rclr(),255));
-			outlinesToDraw.push([int(random(30,100)), [x,y,w,currh,radians*PI]])
-		}
-		let sortedArray = outlinesToDraw.sort(function(a, b) {
-  		return b[0] - a[0];
-		});
-		for(let idx = 0; idx < sortedArray.length; idx++){
-			let arr = sortedArray[idx][1]
-			if(skewRadialOutline) stroke(clr(rclr(),sortedArray[idx][0]));
-			if(arr[3] < minTriangleHeight) continue;
-			rotateTriangle(arr[0], arr[1], arr[2], arr[3], arr[4])
-		}
-	}
-}
-function circularLines(x, y, l, r){
-	line(x, y, (x + cos(r)*l*lineScale), (y - sin(r)*l* lineScale))
-}
-function rotateTriangle(x, y, b, l, r) {
-	triangle (x - sin(r)* b/2, y-cos(r)*b/2, 
-						x + sin(r)*b/2, y + cos(r)*b/2,
-						x + cos(r)*l, y - sin(r)*l)
-}
-function determineRadialScalars(n){
-	altParms = {0:1}
-	if(p(0.1)) {
-		altParms[1] = 1;altParms["r"] = 1; return altParms;
-	}
-
-	for(const num of geoFills) {
-		if(n%num == 0 && n >= 3 * num && p(0.9)) {
-			if(p(0.9)){
-				return geoFill(num, 2, fbtw(0.85, 0.97), altParms)
-			} else if(num == 4 || num == 8) {
-				// console.log("mode splitter:" + num)
-				return modeSplitterA(num, n)
-		}
-	}
-	for(const num of modeSplitters){
-		if (n % num ==0 && n >= 3 * num){
-			// console.log("catch factor from list" + num)
-			return modeSplitterA(num, n)
-		}
-	}
-	if(n % 3 == 0 && n >= 9) {
-		// console.log("catch factor 3")
-		if(p(0.33) ){
-			fillParms(3, 1, 1, fbtw(0.7, 0.9), altParms)
-			return altParms
-		} else {
-			return modeSplitterA(3, n);
-		}
-	}
-	if(n % 2 == 0) {
-		if(p(0.9)){//1-2 alternating
-			altParms['r'] = 2;
-			altParms[1] = fbtw(0.6, 0.9);
-			// console.log("Alternating:" + altParms[1])
-			return altParms
-		}
-	} 
-		if(p(0.75)){
-			return rndParms(n, 1, 1, .8, 1, altParms, n)
-		} else {
-			return fillParms(n, 1, 1, 1, altParms)
-		}
-	
-	return altParms
-}
-function modeSplitterA(n, points){
-	 // console.log("modeSplitter:" + n + "points:" + points)
-		if(p(.25)){
-			return descParms(points/n, 1, fbtw(0.6,0.995), altParms, points)
-		} else if (p(0.33)){
-			return descParms(n, 1, fbtw(0.6,0.995), altParms, points)
-		} else if(p(0.5)){
-			return rndParms(points/n, 1, 1, 0.4, 0.995, altParms, points)
-		} else {
-			return rndParms(n, 1, 1, 0.4, 0.995, altParms, points)
-		}
-}
-function biDescParms(n, inc, m, altParms, points) {
-	// console.log("bidesc Parms:" + n + "inc:" + inc + "multiplier:" + m)
-	altParms["r"] = n
-	lastV = 1;
-	let l = 0-inc; let r = inc;
-	let kill = p(0.5)  && points/n >=4  ? ibtw(2, n/2) : n;
-	// console.log("kill: "  + kill) 
-	for(let i = 0; i < floor(n/2); i++) {
-		while(l < 0) l += n; l %= n;
-		while(r< 0) r +=n; r %= n;
-		if(i == kill || lastV * DIM < minTriangleHeight) lastV = 0;
-		lastV *= m
-		altParms[l] = lastV
-		altParms[r] = lastV
-		l-=inc;r+=inc;
-	}
-		return altParms
-}
-function descParms(n, inc, m, altParms, points) {
-	if(p(1/2)) return biDescParms(n, inc, m, altParms, points)
-	altParms["r"] = n;
-	lastV = 1;
-	if(p(.5)) inc *= -1;
-	// console.log("desc Parms:" + n + "inc:" + inc + "multiplier: " + m)
-	while(inc < 0) inc += n;
-	let s = inc
-	let kill = p(0.5)  && points/n >=4 ? ibtw(2, n) : n;
-	// console.log("kill:" + kill)
-	for(var i = 1; i < n; i++){
-		lastV *= m
-		if( i == kill || lastV * DIM < minTriangleHeight) lastV = 0
-		altParms[s] = lastV
-		// console.log("s:" + s + " v:" + lastV)
-		s = s + inc;
-		while(s < 0) s += n;
-		s %= n;
-	}
-	return altParms
-}
-function rndParms(n, s, inc, l, u, altParms, points) {
-	// console.log("rndParms:" + n)
-	altParms["r"] = n;
-	let kill = p(0.5) && points/n >=4  ? ibtw(2, n) : n;
-	// console.log("kill =" + kill)
-	for(var i = s; i < n; i += inc){
-		altParms[i] = random(l, u)
-		if(i >= kill) altParms[i] = 0;
-		// console.log('altparms' + i + "=" + altParms[i])
-	}
-	return altParms
-}
-function fillParms(n, s, inc, v, altParms){
-	altParms["r"] = n;
-	for(var i = s; i < n; i += inc){
-		altParms[i] = v;
-	}
-	return altParms
-}
-function geoFill(n,f,m,altParms){
-	// console.log("geofill : " + n + "multiplier:" + m)
-		altParms['r'] = n;
-		let currh = 1;
-		let skip = n;
-		while(skip >= f){
-			fillParms(n, skip/f, skip, currh, altParms)
-			currh *= m
-			skip /= f;
-		}
-		return altParms
-}
-}
-function spaceRings(flipBlack, vertex){
-	console.log("spaceRings Function")
-	noFill();
-  let lastBlack = true;
-	let [x, y] = vertex;
-	let numBands = clrs.length
-	let maxWidth = 1*(x < 0 ? DIM - x : max( x, DIM -x))
-	let maxHeight = 1*(y < 0 ? DIM - y : max( y, DIM -y))
-	let minWidth = (x < 0 ? 0 - x : max(0,x - DIM))
-	let minHeight = (y < 0 ? 0 - y : y - DIM)
-	let currBandWidth = int(((maxWidth-minWidth) /numBands) * fbtw(0.7, .9)) + 1;
-	noStroke()
-	let bandCounter = 0;
-	let bandTally = 1;
-	let currHeight = maxHeight
-	let currWidth = maxWidth
-	c1 = color(0,0,0)
-	c2 = rclr()
-	ellipseMode(RADIUS)
-	while(currWidth > minWidth){
-		let diff = (bandCounter)/currBandWidth
- 		let c = lerpColor(c1, c2, diff);
-		fill(c)
-		ellipse(x, y, currWidth, currHeight)
-		currWidth--;
-		currHeight = int((currWidth/maxWidth)* maxHeight) 
-		bandCounter++;
-		if(bandCounter == currBandWidth){
-			bandCounter = 0;
-			c1 = c2;
-			if(flipBlack){
-				c2 = lastBlack ? rclr() : color(0,0,0);
-			} else {
-				c2 = bandTally == numBands ? color(0,0,0) : rclr();
-			}
-			lastBlack = !lastBlack;
-			 
-			currBandWidth = int(((currWidth-minWidth)/(numBands-bandTally)) * fbtw(0.7, .9))+1
-			bandTally++
-			// console.log("currBandWidth:" + currBandWidth)
-		}
-	}
-}
 
