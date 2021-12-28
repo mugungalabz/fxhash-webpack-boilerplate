@@ -22,30 +22,14 @@
 var WIDTH = window.innerWidth
 var HEIGHT = window.innerHeight
 var DIM = Math.min(WIDTH, HEIGHT)
-/* 
-	                  ***Help***
-
-*/	
 var palettes; var palette; var clrs;
 // var hashIdx = 1; var maxHashIdx; var minHashIdx =2;
-var lightx; var lighty; var maskCanvas;
-var lightRadiusBounds = []
+var maskCanvas;
 const minTriangleHeight = 1;
-var starPoints = [4, 5, 6, 7, 8, 9, 12, 13, 15, 16];
-const	modeSplitters = [31, 29, 23, 17, 13, 11, 10, 9, 7, 6, 5]
-const geoFills = [128, 64, 32, 16, 8, 4];
-const starDim = 25;
-var horizonY; var hasWindow;
-const windowMargin = 11;
-var skewRadialFill; var skewRadialOutline;
-var lightSourceDepth;
+var horizonY; 
 var palettes; var paletteInx;
-var hasSpaceRing; var spaceRingVertex;
-var hasStars;
-var hasAsteroids;
-var moonHash;
-var moonCount;
-var voidbg;let hasNebulaBands;
+var clrs;
+
 // noprotect
 function setup() {
   rare_palettes = [
@@ -92,8 +76,8 @@ function setup() {
     {'name' : 'Rainforest Galaxy', 'colors' : [color("#F3EDBF"),color("#CDD05E"),color("#53834F"),color("#734566"),color("#31687D"),color("#42432A"),color("#0A0A0C"),]},
        
   ]
-createCanvas(DIM, DIM);
-  background(0);
+  createCanvas(DIM, DIM);
+  background(200);
 
   palettes = normie_palettes;
   let paletteTier = fxrand();
@@ -107,68 +91,26 @@ createCanvas(DIM, DIM);
     palettes = normie_palettes;
   }
   
-  paletteInx = ibtw(0, palettes.length)
-  palette = palettes[paletteInx]
-  horizonY = DIM * (2 / 3)
-  clrs = palettes[paletteInx]["colors"]
-  lightx = ibtw(DIM * 1 / 6.0, DIM * 5 / 6.0); lighty = ibtw(DIM * (1 / 6.0), DIM * (3 / 6.0));
-  lightRadiusBounds = [DIM / 6, DIM / 2.75]
-  hasSpaceRing = p(.66)
-  spaceRingVertex = [ibtw(0 - DIM / 2, DIM * (3 / 2)), ibtw(0 - 3 * DIM, DIM * 4)]
-  skewRadialFill = p(.5);
-  skewRadialOutline = p(.5);
-  lightSourceDepth = ibtw(1, 4);
-  hasStars = p(.9);
-  hasAsteroids = p(.9);
-  moonHash = fxrand()
-  moonCount = 0;
-  if (moonHash < .2) {
-    moonCount = 0;
-  } else if (moonHash < .35) { 
-    moonCount = 1;
-  } else if (moonHash < .7) {
-    moonCount = 7;
-  } else if (moonHash < .9) {
-    moonCount = 19;
-  } else {
-    moonCount = 37;
-  }
-  voidbg = false;
-  // ymin, ymax, wmin, wmax
-  hasNebulaBands = false;
-  if (p(.5)) {
-    let hasGrad = false
-    if (p(.5)) {
-      singleSplitGradient(.03, .15, .05, .08);
-      hasGrad = true;
-    }
-    if (p(.5)) {
-      singleSplitGradient(.85, .97, .05, .08);
-      hasGrad = true;
-    }
-    if (p(.5)) {
-      //.2, .8, .2, .6
-      doubleSplitGradient(.2, .8, .2, .6);
-      hasGrad = true;
-    }
-    hasNebulaBands = hasGrad;
-  } else if (p(.3)) {
-    skyBandGradient()
-    hasNebulaBands = true;
-  } else if (p(.25)) {
-    sparseBarGradient();
-    hasNebulaBands = true;
-  } 
-  if (!hasSpaceRing && !hasNebulaBands) voidbg = true;
-    window.$fxhashFeatures = {
-    "Palette": palettes[paletteInx]["name"],
-    "Stars": hasStars,
-    "Moons": moonCount,
-    "Nebula Bands" : hasNebulaBands,
-    "Asteroids": hasAsteroids,
-    "Planet Rings": hasSpaceRing,
-    "Void of Space" : voidbg
-  }
+	paletteInx = ibtw(0, palettes.length)
+	palette = palettes[paletteInx]
+	console.log("palette", palette)
+	clrs = palettes[paletteInx]["colors"]
+	bgColor = rclr();
+	background(bgColor);
+	const moonHash = fxrand()//
+
+  	// ymin, ymax, wmin, wmax
+	// if (p(.5)) {
+//   if (!hasSpaceRing && !hasNebulaBands) voidbg = true;
+//     window.$fxhashFeatures = {
+//     "Palette": palettes[paletteInx]["name"],
+//     "Stars": hasStars,
+//     "Moons": moonCount,
+//     "Nebula Bands" : hasNebulaBands,
+//     "Asteroids": hasAsteroids,
+//     "Planet Rings": hasSpaceRing,
+//     "Void of Space" : voidbg
+//   }
 }
 
 function keyPressed() {
@@ -178,31 +120,32 @@ function keyPressed() {
 }
 function draw() {
   
-  console.log(window.$fxhashFeatures)
-  if (hasSpaceRing) spaceRings(p(.5), spaceRingVertex);
-  console.log("moonCount", moonCount)
-  if (moonCount > 0) {
-    let remainingMoons = moonCount;
-    let biCircles = ibtw(moonCount,min(3,moonCount));
-    for(let i = 0; i < biCircles; i++){
-      triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/30, DIM/10), rclr(), rclr(), rclr())
-    }
-    remainingMoons -= biCircles;
-    biCircles = ibtw(0,min(10,remainingMoons));
-    for(let i = 0; i < biCircles; i++){
-      triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/80, DIM/30), rclr(), rclr(), rclr())
-    }
-    remainingMoons -= biCircles;
-    biCircles = remainingMoons;
-    for(let i = 0; i < biCircles; i++){
-      triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/100, DIM/75), rclr(), rclr(), rclr())
-    }
+	console.log(window.$fxhashFeatures)
+	
+//   if (hasSpaceRing) spaceRings(p(.5), spaceRingVertex);
+//   console.log("moonCount", moonCount)
+//   if (moonCount > 0) {
+//     let remainingMoons = moonCount;
+//     let biCircles = ibtw(moonCount,min(3,moonCount));
+//     for(let i = 0; i < biCircles; i++){
+//       triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/30, DIM/10), rclr(), rclr(), rclr())
+//     }
+//     remainingMoons -= biCircles;
+//     biCircles = ibtw(0,min(10,remainingMoons));
+//     for(let i = 0; i < biCircles; i++){
+//       triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/80, DIM/30), rclr(), rclr(), rclr())
+//     }
+//     remainingMoons -= biCircles;
+//     biCircles = remainingMoons;
+//     for(let i = 0; i < biCircles; i++){
+//       triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/100, DIM/75), rclr(), rclr(), rclr())
+//     }
     
-  }
-  if (hasStars) stars();
-  if(hasAsteroids) asteroids();
+//   }
+//   if (hasStars) stars();
+//   if(hasAsteroids) asteroids();
 
-  lightSource();
+//   lightSource();//
   noLoop();
 }
 function initMask(){
