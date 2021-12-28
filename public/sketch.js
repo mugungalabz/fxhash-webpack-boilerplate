@@ -169,7 +169,7 @@ function setup() {
 	clrs = palettes[paletteInx]["colors"]
 	// bgColor = rclr();
 	bgColorIdx = ibtw(0, clrs.length)
-	spaceMode = p(.2);
+	spaceMode = p(.25);
 	let removeBackground = !spaceMode && p(.5);
 	background(spaceMode ? 0 : darken(clrs[bgColorIdx], 5));
 	if (!spaceMode && removeBackground) {
@@ -197,16 +197,16 @@ function setup() {
 	let uniformAngle = p(.33);
 	
 	radialSymmetry = p(.10);
-	FILO = p(.5);
+	FILO = p(.80);
 	for (let i = 0; i < recursionDepth; i++) {
 		scalars.push(fbtw(.1, .6));
 		radii.push(matchRadii ? scalars[-1] : fbtw(.1, .6));
 		orbitals.push(orbitalOptions[ibtw(0, orbitalOptions.length)]);
 		startingAngles.push(uniformAngle ? startingAngles[0] : startAngleOptions[ibtw(0, startAngleOptions.length)]);
 	}
-	for (let i = 0; i < orbitals.length; i++) {
+	for (let i = orbitals.length - 1; i >= 0 ; i--) {
 		orbitalsPattern += orbitals[i]
-		if(i < orbitals.length - 1) {
+		if(i > 0) {
 			orbitalsPattern += "-"
 		}
 	}
@@ -218,6 +218,7 @@ function setup() {
 		"Orbital Pattern": orbitalsPattern,
 		"Recusion Depth": int(recursionDepth),
 		"Radial Symmetry": radialSymmetry ? "Yes" : "No",
+		"Recursion Order": FILO ? "FILO" : "FIFO"
   	}	
 }
 
@@ -235,14 +236,14 @@ function draw() {
 	console.log(window.$fxhashFeatures)
 	mask = getMask(DIM);
 	let center = [DIM / 2, DIM / 2]
-	let rad = DIM / ibtw(2, 6);
+	let rad = DIM / ibtw(2, 5);
 	mask.circle(center[0],center[1],rad);
 	// console.log("recursionDepth in Draw: ", recursionDepth);
 	// console.log("starting with ", scalars[recursionDepth - 1])
 	if(!FILO) applyMask(gradients[0], mask);
 	drawOrbitals(startingAngles[0], center, rad, recursionDepth);
 	if(FILO) applyMask(gradients[0], mask);
-
+	fxpreview();
   noLoop();
 }
 
