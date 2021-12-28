@@ -28,7 +28,16 @@ var maskCanvas;
 const minTriangleHeight = 1;
 var horizonY; 
 var palettes; var paletteInx;
-var clrs;
+var clrs; var numOrbitals;
+const orbitalOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+var startAngles;
+var hanging = false;
+var startAngle;
+var gradients = [];
+var scalars = [];
+var orbitals = [];
+var recursionDepth;
+var gradientFlipIndex;
 
 // noprotect
 function setup() {
@@ -77,7 +86,7 @@ function setup() {
        
   ]
   createCanvas(DIM, DIM);
-  background(200);
+//   background(200);
 
   palettes = normie_palettes;
   let paletteTier = fxrand();
@@ -98,19 +107,31 @@ function setup() {
 	bgColor = rclr();
 	background(bgColor);
 	const moonHash = fxrand()//
+	
+	hanging = p(.5);
+	gradientFlipIndex = ibtw(0,3);
+	startAngles = [0, PI / 2, PI, 3 * PI / 2];
+	extraFourthAngles = [PI/4, 3*PI/4, 5*PI/4, 7*PI/4];
+	extraEightAngles = [PI/8, 3*PI/8, 5*PI/8, 7*PI/8, 9*PI/8, 11*PI/8, 13*PI/8, 15*PI/8];
+	startAngles.push.apply(startAngles,extraFourthAngles);
+	startAngles.push.apply(startAngles, extraEightAngles);
+	console.log("startAngles", startAngles)
+	startAngle = startAngles[ibtw(0, startAngles.length)];
+	recursionDepth = 3;
+	for (let i = 0; i < recursionDepth; i++) {
+		scalars.push(fbtw(.1, .6));
+		orbitals.push(orbitalOptions[ibtw(0,orbitalOptions.length)]);
+	}
+	console.log("orbitals: ", orbitals);
+	// console.log("scalars: ", scalars);
 
   	// ymin, ymax, wmin, wmax
 	// if (p(.5)) {
 //   if (!hasSpaceRing && !hasNebulaBands) voidbg = true;
-//     window.$fxhashFeatures = {
-//     "Palette": palettes[paletteInx]["name"],
-//     "Stars": hasStars,
-//     "Moons": moonCount,
-//     "Nebula Bands" : hasNebulaBands,
-//     "Asteroids": hasAsteroids,
-//     "Planet Rings": hasSpaceRing,
-//     "Void of Space" : voidbg
-//   }
+  	window.$fxhashFeatures = {
+		"Mode": hanging ? "Suspended" : "Floating"
+
+  	}	
 }
 
 function keyPressed() {
@@ -119,34 +140,91 @@ function keyPressed() {
   } 
 }
 function draw() {
-  
-	console.log(window.$fxhashFeatures)
 	
-//   if (hasSpaceRing) spaceRings(p(.5), spaceRingVertex);
-//   console.log("moonCount", moonCount)
-//   if (moonCount > 0) {
-//     let remainingMoons = moonCount;
-//     let biCircles = ibtw(moonCount,min(3,moonCount));
-//     for(let i = 0; i < biCircles; i++){
-//       triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/30, DIM/10), rclr(), rclr(), rclr())
-//     }
-//     remainingMoons -= biCircles;
-//     biCircles = ibtw(0,min(10,remainingMoons));
-//     for(let i = 0; i < biCircles; i++){
-//       triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/80, DIM/30), rclr(), rclr(), rclr())
-//     }
-//     remainingMoons -= biCircles;
-//     biCircles = remainingMoons;
-//     for(let i = 0; i < biCircles; i++){
-//       triGradientCircle(ibtw(0, DIM), ibtw(0, DIM), ibtw(DIM/100, DIM/75), rclr(), rclr(), rclr())
-//     }
-    
-//   }
-//   if (hasStars) stars();
-//   if(hasAsteroids) asteroids();
+	gradients.push(ringGradient());
+	gradients.push(ringGradient());
+	gradients.push(ringGradient());
+	console.log("gradient created");
+	// image(gradients[0], 0, 0, DIM, DIM);
+	console.log("image drawn");
+	console.log(window.$fxhashFeatures)
+	mask = getMask(DIM);
+	let center = [DIM / 2, DIM / 2]
+	let rad = DIM / 3
+	mask.circle(center[0],center[1],rad);
+	applyMask(gradients[0], mask);
+	console.log("recursionDepth in Draw: ", recursionDepth);
+	console.log("starting with ", scalars[recursionDepth-1])
+	drawOrbitals(startAngle, center, rad,  recursionDepth);
 
-//   lightSource();//
   noLoop();
+}
+
+function drawOrbitals(_startAngle, _center, _rad, _n) {
+	if(_n<=0) return;
+	// console.log("numOrbitals", _n);
+	// console.log("scalars[_n]", scalars[_n])
+	var currAngle = _startAngle;
+	var rotationRadians = (PI * 2) / orbitals[_n-1];
+	
+	for (let o = 0; o < orbitals[_n-1]; o++) {
+		// console.log("Orbaital", o, " of ", _n);
+		let ox = _center[0] + _rad * cos(currAngle);
+		let oy = _center[1] + _rad * sin(currAngle);
+		// console.log("_rad * scalars[_n]", (_rad * scalars[_n-1]));
+		let orad = _rad * scalars[_n-1]
+		let omask = getMask(DIM);
+		// console.log("ox: ", ox, " oy:", oy, " orad:", orad);
+		omask.circle(ox, oy, orad);
+		gIdx = _n % 2 == 1 ? gradientFlipIndex : 1;
+		applyMask(gradients[gIdx], omask);
+		currAngle += rotationRadians;
+		let newCenter = [ox, oy];
+		drawOrbitals( _startAngle, newCenter, orad, _n - 1);
+	}
+}
+function getMask(DIM) {
+  var mask = createGraphics(DIM, DIM);
+  mask.noStroke();
+  mask.fill(255);
+  return mask;
+}
+function ringGradient() {
+	var gradientCanvas = createGraphics(DIM, DIM);
+	const numRings = clrs.length * ibtw(1,4);
+	// console.log("numRings", numRings)
+	var vertex = [ibtw(0, DIM), ibtw(0, DIM)];
+	// console.log("gradient vertex", vertex)
+	let startRadius = DIM * 2.75;
+	// console.log("startRadius", startRadius)
+	let ringWidth = floor(DIM / numRings)*ibtw(1, 8);
+	// console.log("ringWidth", ringWidth)
+	let currRadius = startRadius;
+	gradientCanvas.noStroke();
+	var i = 0;
+	// for (let i = 0; i < numRings; i++) {
+	while(currRadius > 0) {
+		c1 = clrs[i % clrs.length];
+		c2 = clrs[(i + 1) % clrs.length];
+		let gradStartRadius = currRadius
+		for (let r = 0; r < ringWidth; r++) {
+			let diff = r / ringWidth;
+			// console.log("diff", diff)
+			currRadius = gradStartRadius - r;
+			if (currRadius < 0) break;
+
+			let c = lerpColor(c1, c2, diff);
+			gradientCanvas.fill(c);
+			gradientCanvas.circle(vertex[0], vertex[1], currRadius, currRadius);
+			// fill(c);
+			// circle(vertex[0], vertex[1], currRadius);
+			// console.log("currRaduis", currRadius)
+		}
+		i++;
+
+	}
+
+	return gradientCanvas;
 }
 function initMask(){
 	maskCanvas = createGraphics(DIM, DIM)
@@ -331,21 +409,7 @@ function streakGradient(i, bandH, yStart){
 		line(0, y, DIM, y);
 	} 
 }
-function stars(){
 
-			var limit = x()*2
-			limit *=2
-			points = starPoints[ibtw(0,starPoints.length)]
-			for(var i = 10; i < 10 + limit; i++){
-				radialShape(ibtw(DIM*(1/25), DIM*(24/25)), 
-										ibtw(DIM*(1/25), DIM*24/25), 
-										ibtw(DIM/70, DIM/20), 
-										ibtw(DIM/70, DIM/20), 
-										rclr(), rclr(), rclr(), 
-										points
-				);
-			}
-}
 function lightSource(){
 	let lc1, lc2, lc3
 	if("light" in palette){
@@ -384,31 +448,7 @@ function lightSource(){
 			}
 			
 }
-function asteroids(){
-	noStroke()
-	let yCenter = ibtw(DIM*0.00, DIM * 0.05);
-	
-	let total = ibtw(35, 60)
-	let m = total;
-	let yInc = ((DIM - yCenter)/total);
-	let shadeDiff = 30
-	while(m-- > 0) {
-		let xCenter = ibtw(0, DIM)
-		let h = p(0.85) ? abs(ibtw(4, DIM/80)) : ibtw(4, DIM/10)
-		let angle = PI/(fbtw(2, 10))
-		let w = h/tan(angle)
-		let midx = p(0.5) ? xCenter - w/3.0 : xCenter + w/3.0;
-		fill(lightx < xCenter ? clrs[m%clrs.length] : darken(clrs[m%clrs.length], shadeDiff));
-		triangle(xCenter - w, yCenter, xCenter + w, yCenter, xCenter, yCenter + h)
-		fill(lightx < xCenter ? lighten(clrs[m%clrs.length], shadeDiff) : clrs[m%clrs.length]);
-		triangle(xCenter - w, yCenter, xCenter + w, yCenter, xCenter, yCenter - h)
-		fill(lightx > xCenter ? clrs[m%clrs.length] : darken(clrs[m%clrs.length], shadeDiff));
-		triangle(midx, yCenter, xCenter + w, yCenter, xCenter, yCenter + h)
-		fill(lightx > xCenter ? lighten(clrs[m%clrs.length], shadeDiff) : clrs[m%clrs.length]);
-		triangle(midx, yCenter, xCenter + w, yCenter, xCenter, yCenter - h)
-		yCenter += yInc;
-	}
-}
+
 function radialShape(x, y, h, w , c1, c2, c3, points){
 	let startRadians = 0.5;
 	let radialScalars = {"r": 1, 0:1}
