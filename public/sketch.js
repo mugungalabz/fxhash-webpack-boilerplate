@@ -239,12 +239,33 @@ function keyPressed() {
   } 
 }
 function draw() {
+	background(1)
 	colorMode(HSL)
-	for (let c of colors) { 
-		fill(c)
-		circle(random()*DIM, random()*DIM, random()*DIM/2)
+	// for (let c of colors) { 
+	// 	fill(c)
+	// 	circle(random()*DIM, random()*DIM, random()*DIM/2)
+	// }
+	// console.log("first color: " + colors[0])
+	let angle = 3 * PI / 2;
+	let radius = DIM / 3
+	let vertex = {x : DIM/2, y:DIM/2}
+	noStroke();
+	for(let i = 0; i < 200; i++){
+		lineMist(colors[i%colors.length], random()*5);
 	}
-	console.log("first color: " + colors[0])
+	hairTriangle(vertex, angle, radius, radius * 10, colors[0])
+	// fill([colors[1][0], colors[1][1], colors[1][2], 1])
+	fill(0, 0, 0, .45)
+	noStroke()
+	triangle(
+		vertex.x + radius*cos(angle),
+		vertex.y + radius * sin(angle),
+		vertex.x + radius*cos(5 * PI / 6),
+		vertex.y + radius * sin(5 * PI / 6),
+		vertex.x + radius*cos(1 * PI / 6),
+		vertex.y + radius * sin(1 * PI / 6)
+	)
+
 	// gradients.push(ringGradient());
 	// gradients.push(ringGradient());
 	// gradients.push(ringGradient());
@@ -262,7 +283,47 @@ function draw() {
 	fxpreview();
   noLoop();
 }
-
+function lineMist(c, sw){
+	let x = random()*DIM*(1/2);// + DIM/4;
+	let y = random()*DIM/2 + DIM/4;
+	let len = random()* DIM;
+	let lines = int(random()*10+300);
+	let n = 50;
+	currSw = sw*random()
+	currSwMultipler = .95 + random()*.1
+	strokeWeight(currSw);
+	c[3] = .2 + random()*.8
+	stroke(c);
+	let y1= y
+	let y2 =y
+	let lCounter = 0;
+	let rev  = random() < .5;
+	let lMultiplier = random()*.03 + .96
+	let alphaMultiplier = random()*3 + 1
+	while(lCounter < lines){
+		line(x, y1, x+ len, y1);
+		if(lCounter > 0) line(x, y2, x+ len, y2);
+		// break;
+		strokeWeight(random()*4)
+		y1-=currSw;
+		y2+=currSw;
+		currSw *= currSwMultipler
+		lCounter++;
+		// c[3] = map(1-lCounter/lines, 0, 1, 0, 255);
+		c[3] = Math.pow(lCounter/lines,alphaMultiplier)
+		// console.log("color" + c)
+		stroke(c)
+		// x += random()*len*2-len/2
+		x += random()*len/20 - random()*len/(20 + random()*20)
+		len = (len*lMultiplier) + random()*.04
+	}
+	if(random() < .05){
+		c[3] = .05 + random()*.5
+		stroke(c)
+		line(x+len/2, y1, x + len/2, y2)
+	}
+	
+}
 function drawOrbitals(parentAngle, _center, _rad, _n) {
 	if (_n <= 0) return;
 	var currAngle = radialSymmetry ?  parentAngle : startingAngles[_n - 1];
@@ -522,6 +583,212 @@ function getGlitchColorHSL(n , mode, options){
 	// hslVals[0] = int(random()*360);
 	return hslColors;
 }
+function getAngleBetweenPoints(p1, p2){
+	return atan2(p2.y-p1.y, p2.x-p1.x);
+}
 
+function getIntersectionOfTwoLines(l1, l2){
+		let x1 = l1.p1.x;
+	let y1 = l1.p1.y;
+	let x2 = l1.p2.x;
+	let y2 = l1.p2.y;
+	let x3 = l2.p1.x;
+	let y3 = l2.p1.y;
+	let x4 = l2.p2.x;
+	let y4 = l2.p2.y;
+	let denominator = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)
+	let numeratorI = (x1*y2-y1*x2)*(x3-x4) - (x1-x2)*(x3*y4-y3*x4);
+	let numeratorII = (x1*y2-y1*x2)*(y3-y4) - (y1-y2)*(x3*y4-y3*x4);;
+	return({x:numeratorI/denominator, y:numeratorII/denominator})
+	// let denominator = (l1.p1.x-l1.p2.x)*(l2.p1.y-l2.p2.y) - (l1.p1.y-l1.p2.y)*(l2.p1.x-l2.p2.x)
+	// let numeratorI = (l1.p1.x*l1.p2.y-l1.p1.y*l1.p2.x)*(l2.p1.x-l2.p2.x) - (l1.p1.x-l1.p2.x)*(l2.p1.x*l2.p2.y-l2.p1.y*l2.p2.x);
+	// let numeratorII = (l1.p1.x*l1.p2.y-l1.p1.y*l1.p2.x)*(l2.p1.y-l2.p2.y) - (l1.p1.y-l1.p2.y)*(l2.p1.x*l2.p2.y-l2.p1.y*l2.p2.x);;
+	// return({x:numeratorI/denominator, y:numeratorII/denominator})
+}
+function hairTriangle(vertex, angle, innerRadius, outerRadius, c) {
+	console.log("Drawing hair triangle")
+	noFill()
+	strokeWeight(1)
+	stroke(255)
+	let innerCorners = [
+		vertex.x + innerRadius*cos(angle), 
+		vertex.y + innerRadius*sin(angle), 
+		vertex.x + innerRadius*cos((angle+ 2*PI/3)%(2*PI)), 
+		vertex.y + innerRadius*sin((angle+ 2*PI/3)%(2*PI)), 
+		vertex.x + innerRadius*cos((angle+ 4*PI/3)%(2*PI)), 
+		vertex.y + innerRadius*sin((angle+ 4*PI/3)%(2*PI)), 
+	]
+	let corners = [
+		vertex.x + outerRadius*cos(angle), 
+		vertex.y + outerRadius*sin(angle), 
+		vertex.x + outerRadius*cos((angle+ 2*PI/3)%(2*PI)), 
+		vertex.y + outerRadius*sin((angle+ 2*PI/3)%(2*PI)), 
+		vertex.x + outerRadius*cos((angle+ 4*PI/3)%(2*PI)), 
+		vertex.y + outerRadius*sin((angle+ 4*PI/3)%(2*PI)), 
+	]
+
+	hairlineThroughVertex(
+		vertex, 
+		{x: corners[2], y: corners[3]},
+		{x: corners[0], y: corners[1]},
+		{x: innerCorners[2], y: innerCorners[3]},
+		{x: innerCorners[0], y: innerCorners[1]},
+		outerRadius,
+		c
+	)
+	hairlineThroughVertex(
+		vertex, 
+		{x: corners[4], y: corners[5]},
+		{x: corners[0], y: corners[1]},
+		{x: innerCorners[4], y: innerCorners[5]},
+		{x: innerCorners[0], y: innerCorners[1]},
+		outerRadius,
+		c
+	)
+	// hairlineThroughVertex(
+	// 	vertex, 
+	// 	{x: corners[4], y: corners[5]},
+	// 	{x: corners[2], y: corners[3]},
+	// 	{x: innerCorners[4], y: innerCorners[5]},
+	// 	{x: innerCorners[2], y: innerCorners[3]},
+	// 	outerRadius,
+	// 	c
+	// )
+	
+}
+function randomPointInCircle(vertex, r){
+	let radius = random()*r;
+	let angle = random()*2*PI;
+	return(
+		{
+			x :vertex.x+cos(angle)*radius,
+			y :vertex.y+sin(angle)*radius
+		}
+	);
+}
+
+function hairlineThroughVertex(vertex, p1, p2, innerp1, innerp2, radii, c){
+		let distance = dist(p1.x, p1.y, p2.x, p2.y)
+		// circle(p1.x, p1.y, 4)
+		// circle(p2.x, p2.y, 4)
+		let currDist = 0;
+		let guidelineAngle = getAngleBetweenPoints({x:p1.x,y:p1.y},{x:p2.x, y:p2.y})
+		console.log("guidelineAngle:",guidelineAngle)
+		stroke(colors[2])
+		let lCnt = 0;
+		stroke(colors[Math.floor(random()*colors.length)][0], 20 + random(60), 20 + random(60), .35)
+		strokeWeight(10)
+		while(currDist< distance){
+		// console.log("corners[0]" + corners[0])
+			stroke(colors[Math.floor(random()*colors.length)][0], 20 + random(60), 20 + random(60), .35)
+			let currX = p1.x + currDist*cos(guidelineAngle)
+			let currY = p1.y + currDist*sin(guidelineAngle)
+			// circle(currX, currY, 5)
+			// console.log("hairline: " + currX + "," + currY)
+			let innerPoint = getIntersectionOfTwoLines(
+				{ p1 : {x : innerp1.x, y: innerp1.y},
+					p2 : {x : innerp2.x, y: innerp2.y}},
+				{ p1 : {x : vertex.x, y: vertex.y},
+			 		p2 : {x : currX, y: currY}});
+			// console.log("curr: " + currX + "," + currY + " : " + "inner:" + innerPoint.x + "," + innerPoint.y);
+			
+			// line(currX, currY, innerPoint.x, innerPoint.y)
+			lLine(
+				{x: currX, y :currY}, 
+				innerPoint, 
+				35, [colors[Math.floor(random()*colors.length)][0], 20 + random(60), 20 + random(60), .35],
+			// "STANDARD"
+			// "BUNDLE_OF_THATCH",{}
+			"RING",
+			{density : .3, 
+			ringVariance : (0, 1)}
+			// "GRAINY",
+			// {
+			// 	density : .05,
+			// 	scatter: true
+			// },
+			// "SPIKEY",
+			// {}
+			);
+			// line(currX, currY, vertex[0], vertex[1])
+			currDist+=80;
+			lCnt++;
+			// if(lCnt > 20) break;
+	}
+}
+
+function lLine(p1, p2, thickness, c, mode, options){
+	switch(mode){
+		case "STANDARD":standardLine(p1, p2, thickness, c,options); 
+			break;
+		case "BUNDLE_OF_THATCH":thatchLine(p1, p2, thickness, c,options);
+			break;
+		case "RING":ringLine(p1, p2, thickness, c, options);
+			break;
+		case "GRAINY":
+			options["dots"] = true;
+			ringLine(p1, p2, thickness, c, options);
+			break;
+		case "SPIKEY":
+			spikeyLine(p1, p2, thickness, c, options)
+			break;
+		default:
+			console.log("MODE not handled for lLine: " + mode);
+			break;
+	}
+}
+
+function ringLine(p1, p2, thickness, c, options) {
+	console.log("ringline options:", options)
+	if (!options.density) {
+		console.log("RINGLINE DEFAULT DENSITY")
+		options["density"] = DEFAULT_DENSITY;
+	}
+	let angle = getAngleBetweenPoints(p1, p2);
+	let d = dist(p1.x, p1.y, p2.x, p2.y);
+	let area = d * thickness;
+	let p = options.density * (options.dots ? area : d); 
+	// console.log("p,", p);
+	if(options.fill){
+		fill(options.fill);
+	} else {
+		noFill();
+	}
+	if(options.dots){
+		noStroke();
+		fill(c);
+	}
+	strokeWeight(1);
+	stroke(c);
+	fill([c[0], c[1], c[2], .04]);
+	for(let i = 0; i < p; i++){
+		let b = options.scatter ? random() * thickness : 0;
+		let m = random() * d;
+		let v = {
+			x: p1.x + cos(angle)*m + cos(angle+PI/2)*b,
+			y: p1.y + sin(angle)*m + sin(angle+PI/2)*b,
+		}
+		let radius = options.ringVariance ? random(options.ringVariance[0], options.ringVariance[1])*thickness : thickness;
+		if(options.dots) radius =.2;
+		circle(v.x, v.y, radius);
+	}
+}
+	
+function thatchLine(p1, p2, thickness, c, options){
+	for(let i = 0; i < thickness*3; i++){
+		// r1 = randomPointInCircle(p1, sWeight);
+		// r2 = randomPointInCircle(p2, sWeight);
+		standardLine(
+			randomPointInCircle(p1, thickness), 
+			randomPointInCircle(p2, thickness), 
+			1, c);
+	}
+}
+function standardLine(p1, p2, thickness, c, options){
+	// console.log("standard line color:", c);
+	strokeWeight(thickness);
+	stroke(c);
+	line(p1.x, p1.y, p2.x, p2.y);
+}
 
 
