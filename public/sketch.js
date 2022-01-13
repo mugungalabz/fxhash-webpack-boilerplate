@@ -42,6 +42,7 @@ var recursionDepth;
 var gradientFlipIndex;
 var FILO;
 var radialSymmetry;
+var colors;
 
 // noprotect
 function setup() {
@@ -138,15 +139,23 @@ function setup() {
 				//x    {'name' : 'Colour out of Space', 'colors' : [color("#E7CF9F"),color("#52807D"),color("#69394B"),]},
 				//x {'name' : 'Tango Nebulae', 'colors' : [color("#FEFDFD"),color("#FCF0EF"),color("#FDE5E7"),color("#FCD1D2"),color("#FBBEC1"),color("#F6B7B3"),color("#F8ACAE"),color("#82BEB5"),color("#89B8B0"),color("#F6787E"),color("#98A8A2"),color("#F46064"),color("#F15255"),color("#E2585C"),color("#F1464D"),color("#E5414C"),color("#D73E45"),color("#CC3D42"),color("#BB363C"),color("#A83136"),color("#942D2F"),color("#7C2527"),color("#702124"),color("#491517"),color("#391213"),color("#181214"),color("#1A0909"),color("#0B0304"),]},
 	]
-	gchain_palettes = [
+	glitch_palettes = [
+		{
+			name: "Island",
+			startHue: Math.random()*360,
+			n: 30,
+			degrees: 3,
+			
+		}
 	]
 	createCanvas(DIM, DIM);
 //   background(200);
-
+	let palette = glitch_palettes[0];
+	console.log("palette" + palette)
   palettes = normie_palettes;
 	let paletteTier = fxrand();
 	let ULTRA = 0.01; //.01
-	let SUPER = 0.04; //.04
+	let SUPER = 0.05; //.04..
 	let RARE = 0.15; //.14
   if (paletteTier <= ULTRA) {
     palettes = ultra_rare_palettes;
@@ -164,8 +173,10 @@ function setup() {
 	// palettes = gchain_palettes;
   
 	paletteInx = ibtw(0, palettes.length)
-	palette = palettes[paletteInx]
+	// palette = palettes[paletteInx]
 	console.log("palette", palette)
+	colorMode(HSL)
+	colors = getGlitchColorHSL(palette.n, "ANALOGOUS", {degree : palette.degrees, seedColor : [palette.startHue,80+int(random()*20),50]})
 	clrs = palettes[paletteInx]["colors"]
 	// bgColor = rclr();
 	bgColorIdx = ibtw(0, clrs.length)
@@ -228,21 +239,26 @@ function keyPressed() {
   } 
 }
 function draw() {
-	
-	gradients.push(ringGradient());
-	gradients.push(ringGradient());
-	gradients.push(ringGradient());
-	// image(gradients[0], 0, 0, DIM, DIM);
-	console.log(window.$fxhashFeatures)
-	mask = getMask(DIM);
-	let center = [DIM / 2, DIM / 2]
-	let rad = DIM / ibtw(2, 5);
-	mask.circle(center[0],center[1],rad);
-	// console.log("recursionDepth in Draw: ", recursionDepth);
-	// console.log("starting with ", scalars[recursionDepth - 1])
-	if(!FILO) applyMask(gradients[0], mask);
-	drawOrbitals(startingAngles[0], center, rad, recursionDepth);
-	if(FILO) applyMask(gradients[0], mask);
+	colorMode(HSL)
+	for (let c of colors) { 
+		fill(c)
+		circle(random()*DIM, random()*DIM, random()*DIM/2)
+	}
+	console.log("first color: " + colors[0])
+	// gradients.push(ringGradient());
+	// gradients.push(ringGradient());
+	// gradients.push(ringGradient());
+	// // image(gradients[0], 0, 0, DIM, DIM);
+	// console.log(window.$fxhashFeatures)
+	// mask = getMask(DIM);
+	// let center = [DIM / 2, DIM / 2]
+	// let rad = DIM / ibtw(2, 5);
+	// mask.circle(center[0],center[1],rad);
+	// // console.log("recursionDepth in Draw: ", recursionDepth);
+	// // console.log("starting with ", scalars[recursionDepth - 1])
+	// if(!FILO) applyMask(gradients[0], mask);
+	// drawOrbitals(startingAngles[0], center, rad, recursionDepth);
+	// if(FILO) applyMask(gradients[0], mask);
 	fxpreview();
   noLoop();
 }
@@ -451,6 +467,60 @@ function doubleSplitGradient(ymin, ymax, wmin, wmax) {
   barGradient(c2, c3, totalH / 4, int(currY));
   currY += totalH / 4;
   barGradient(c3, color(0, 0, 0), totalH / 4, int(currY));
+}
+
+function getGlitchColorHSL(n , mode, options){
+	hslColors = [];
+	colorMode(HSL)
+	hslColors.push(options.seedColor ? options.seedColor : [random()*360,80+int(random()*20),50])
+	console.log("start hue:" + hslColors[0][0]);
+	let degreeDiff;
+	switch(mode){
+		case "ANALOGOUS" :
+			degreeDiff = options.degree ? options.degree : 360/12;
+			// hslColors.push([random()*360,80+int(random()*20),50])
+			for(let i = 0; i < n-1; i++){
+				hslColors.push([(hslColors[i][0]+degreeDiff)%360, hslColors[i][1], hslColors[i][2]])
+			}
+			break;
+		case "SPLIT":
+			degreeDiff = 360/n;
+			for(let i = 0; i < n-1; i++){
+				hslColors.push([(hslColors[i][0]+degreeDiff)%360, hslColors[i][1], hslColors[i][2]])
+			}
+			break;
+		case "DIAD":
+			hslColors.push([(hslColors[0][0]+60)%360, hslColors[0][1], hslColors[0][2]])
+			break;
+		case "COMPLIMENTARY":
+			hslColors.push([(hslColors[0][0]+180)%360, hslColors[0][1], hslColors[0][2]])
+			break;
+		case "FETCH_COMPLIMENTARY":
+			hslColors = [];
+			degreeDiff = options.degree ? options.degree : 360/12;
+			console.log("hue fulcrum: " + options.fulcrum)
+			let fulcrum = (options.fulcrum + 180)%360
+			let hueStart = (fulcrum + degreeDiff*(n-1)/2)%(360);
+			for(let i =0; i < n; i++){
+				hslColors.push([hueStart,100, 50 ]);
+				hueStart += degreeDiff;
+			}
+			break;
+		case "SPLIT_COMPLIMENTARY":
+			hslColors.push([(hslColors[0][0]+210)%360, hslColors[0][1], hslColors[0][2]]);
+			hslColors.push([(hslColors[0][0]+150)%360, hslColors[0][1], hslColors[0][2]]);
+			break;
+		case "RANDOM" :
+		default:
+			for(let i= 0; i < n-1; i++){
+				hslColors.push(hslVals = [random()*360,80+int(random()*20),50])
+			}
+		break;
+	}
+	console.log("HSLColors creeated:" + hslColors)
+	// hslVals = [random()*360,80+int(random()*20),50]
+	// hslVals[0] = int(random()*360);
+	return hslColors;
 }
 
 
