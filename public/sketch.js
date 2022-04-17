@@ -19,6 +19,8 @@
 //   "Number of lines": 10,
 //   "Inverted": true
 // }
+var W
+var H
 var WIDTH = window.innerWidth
 var HEIGHT = window.innerHeight
 var DIM = Math.min(WIDTH, HEIGHT)
@@ -38,13 +40,100 @@ var scalars = [];
 var orbitals = [];
 var radii = [];
 var startingAngles = [];
+var tAngles = [];
 var recursionDepth;
 var gradientFlipIndex;
 var FILO;
 var radialSymmetry;
+var triangleAimMode;
+const ASPECT = 16 / 9
+
 
 // noprotect
 function setup() {
+	qoa_palettes = [
+		{ 'name': 'Flamingo', 'colors': [color("#F2D6A9"), color("#F89683"), color("#D8807F"), color("#CF514C"),] },
+		{ 'name': 'Rose Garden', 'colors': [color("#FFF8F5"), color("#F06E99"), color("#F02232"),] },
+		{ 'name': 'Hawaii', 'colors': [color("#FE6579"), color("#FEAE00"), color("#F72447"), color("#694E50"),] },
+		{ 'name': 'Miami', 'colors': [color("#FFFFDC"), color("#CB5A7A"), color("#5D276C"), color("#000000"),] },
+		{ 'name': 'Thrall Soul', 'colors': [color("#A89852"), color("#514A33"), color("#000000"),] },
+
+	]
+	qoa_palettess = [
+		// { 'name': 'Innocence', 'colors': [color("#FFDF84"), color("#F07E9C"), color("#D9566B"),] },
+		{ 'name': 'qoa01p03', 'colors': [color("#FFDF55"), color("#A66B0F"), color("#000000"),] },
+		// { 'name': 'Starburst', 'colors': [color("#FFCB00"), color("#FFA100"), color("#FF6C14"), color("#F44219"), color("#E40045"),] },
+		{ 'name': 'qoa01p06', 'colors': [color("#F5A2A0"), color("#F2625C"), color("#2F2323"),] },
+		// { 'name': 'Bouquet', 'colors': [color("#F8E1CB"), color("#C2586F"), color("#BB315C"), color("#AD152E"), color("#590E14"),] },
+		{ 'name': 'qoa01p09', 'colors': [color("#FEDC2C"), color("#EFCA46"), color("#D8AD23"), color("#251C02"),] },
+		// { 'name': "Tiger's Eye", 'colors': [color("#F7EA27"), color("#DC6D0C"), color("#1A1003"),] },
+		{ 'name': 'qoa01p11', 'colors': [color("#FAF5D9"), color("#EA0000"), color("#000000"),] },
+		{ 'name': 'qoa01p13', 'colors': [color("#FFECC1"), color("#67C5D1"), color("#0080A0"), color("#780000"),] },
+		{ 'name': 'qoa01p15', 'colors': [color("#FBC365"), color("#F8582B"), color("#E5451E"), color("#161400"),] },
+		// { 'name': 'Candle Glow', 'colors': [color("#FBE66E"), color("#1F1D15"),] },
+		// { 'name': 'Spring Sky', 'colors': [color("#FF92BA"), color("#BE569D"), color("#4695D3"), color("#9A316A"), color("#370029"),] },
+		{ 'name': 'qoa01p21', 'colors': [color("#FFFCC6"), color("#3DDCE5"), color("#00BEC7"), color("#6C0434"),] },
+		{ 'name': 'qoa01p22', 'colors': [color("#F7F1AB"), color("#F4CD2A"), color("#FB5900"), color("#202000"),] },
+		{ 'name': 'qoa01p24', 'colors': [color("#FFE8E6"), color("#DC5C81"), color("#DD1337"),] },
+		{ 'name': 'qoa01p25', 'colors': [color("#97FABE"), color("#D58CC3"), color("#63276D"), color("#003941"),] },
+		// { 'name': 'Devil Elf', 'colors': [color("#FFFFF1"), color("#E00000"), color("#003000"), color("#000000"),] },
+		// { 'name': 'Nation', 'colors': [color("#FFFFF1"), color("#E00000"), color("#000000"),] },
+		// { 'name': 'Steel', 'colors': [color("#FAE4B8"), color("#754B0D"), color("#02020C"),] },
+		{ 'name': 'qoa01p30', 'colors': [color("#F375CF"), color("#04BBFC"), color("#000000"),] },
+		// { 'name': 'Newborn', 'colors': [color("#FFF0C7"), color("#B36497"), color("#0095BB"), color("#00597E"),] },
+		{ 'name': 'qoa01p32', 'colors': [color("#E4EEC7"), color("#0E0E0E"),] },
+		{ 'name': 'qoa01p33', 'colors': [color("#FEFBD4"), color("#0B4661"), color("#123856"),] },
+		{ 'name': 'qoa01p34', 'colors': [color("#FFFFD4"), color("#FFEE5F"), color("#449A78"), color("#284A32"),] },
+		// { 'name': 'Solar Flare', 'colors': [color("#FBDC87"), color("#797540"), color("#22210A"),] },
+		// { 'name': 'Moth', 'colors': [color("#FBDC87"), color("#797540"), color("#22210A"),] },
+		{ 'name': 'qoa01p36', 'colors': [color("#FDD596"), color("#D40000"), color("#000000"),] },
+		// { 'name': 'Static', 'colors': [color("#FBFCDF"), color("#B1AF99"), color("#706F5B"), color("#2A290E"),] },
+		// { 'name': 'Tropic Fruit', 'colors': [color("#FCEA38"), color("#F8822A"), color("#EE2A3A"), color("#030A21"),] },
+		{ 'name': 'qoa01p39', 'colors': [color("#9DD6E1"), color("#FB9292"), color("#682727"), color("#352F2B"),] },
+		{ 'name': 'qoa01p40', 'colors': [color("#FFFAE6"), color("#6DBDE3"), color("#009FE1"), color("#005280"),] },
+		// { 'name': 'Shriek', 'colors': [color("#FFDBAA"), color("#E9003B"), color("#8D133A"), color("#D80000"),] },
+		{ 'name': 'qoa01p44', 'colors': [color("#FBE98E"), color("#E1B11F"), color("#6D8E3C"), color("#62882B"), color("#4B510B"), color("#5A2F00"),] },
+		{ 'name': 'qoa01p46', 'colors': [color("#FFD596"), color("#FF7295"), color("#4491B6"), color("#981C61"), color("#3D132C"),] },
+		{ 'name': 'qoa01p47', 'colors': [color("#FFD69F"), color("#FF728B"), color("#9B2975"), color("#7A0040"),] },
+		{ 'name': 'qoa01p48', 'colors': [color("#FEDC9B"), color("#694C06"),] },
+		{ 'name': 'qoa01p49', 'colors': [color("#EE8A98"), color("#E9798C"), color("#B04376"), color("#964278"), color("#7C264F"), color("#2B001C"),] },
+		{ 'name': 'qoa01p50', 'colors': [color("#FF982E"), color("#C14242"), color("#000018"),] },
+		{ 'name': 'qoa01p51', 'colors': [color("#FEEECB"), color("#75B4BF"), color("#095F83"), color("#00327C"),] },
+		{ 'name': 'qoa01p53', 'colors': [color("#FFFFA0"), color("#FF9682"), color("#DF7F7D"), color("#D3463F"), color("#A41400"), color("#000000"),] },
+		{ 'name': 'qoa01p55', 'colors': [color("#E7D9C2"), color("#D5839B"), color("#66265C"), color("#460033"),] },
+		// { 'name': 'Iron', 'colors': [color("#FFBC77"), color("#957A53"), color("#151415"),] },
+		{ 'name': 'qoa01p58', 'colors': [color("#FF4128"), color("#151721"),] },
+		{ 'name': 'qoa01p59', 'colors': [color("#FFF5C7"), color("#DF656A"), color("#CB1226"),] },
+		{ 'name': 'RandomPalette78', 'colors': [color("#D3B083"), color("#B09063"), color("#6D5C47"), color("#1A140E"),] },
+		{ 'name': 'RandomPalette80', 'colors': [color("#F2D6A9"), color("#F89683"), color("#D8807F"), color("#CF514C"), color("#000000"),] },
+		{ 'name': 'RandomPalette81', 'colors': [color("#25A8FC"), color("#ED0060"), color("#000025"),] },
+		// { 'name': 'Mango', 'colors': [color("#FFD124"), color("#EB9215"), color("#0F1321"),] },
+		{ 'name': 'RandomPalette84', 'colors': [color("#FDE4A2"), color("#36677A"), color("#746E00"), color("#0F0000"),] },
+		// { 'name': 'Icycle', 'colors': [color("#FDE4A2"), color("#36677A"), color("#0F0000"),] },
+		{ 'name': 'RandomPalette86', 'colors': [color("#FBDFBB"), color("#FD9DA0"), color("#C3667E"), color("#7F5182"), color("#040809"),] },
+		{ 'name': 'RandomPalette87', 'colors': [color("#E59AD0"), color("#DB0020"), color("#00304B"),] },
+		{ 'name': 'RandomPalette88', 'colors': [color("#FFDD5B"), color("#729556"), color("#885415"), color("#552500"), color("#262900"),] },
+		{ 'name': 'RandomPalette89', 'colors': [color("#FFD430"), color("#E1672A"), color("#D4442A"), color("#CD2C37"), color("#C51846"), color("#0A1020"),] },
+		{ 'name': 'RandomPalette90', 'colors': [color("#FFD430"), color("#E1672A"), color("#D4442A"), color("#C51846"), color("#0A1020"),] },
+		// { 'name': 'Psychopsilociben', 'colors': [color("#FFD430"), color("#E1672A"), color("#C51846"), color("#0A1020"),] },
+		{ 'name': 'RandomPalette94', 'colors': [color("#FDECBB"), color("#160D14"),] },
+		// { 'name': 'Ravishing', 'colors': [color("#FFA7B4"), color("#F478A2"), color("#AA5A8E"), color("#89395F"), color("#310E23"),] },
+		{ 'name': 'RandomPalette96', 'colors': [color("#FDFCFD"), color("#A8A8A8"), color("#5F5F5F"), color("#4A4A4A"), color("#080808"),] },
+		{ 'name': 'RandomPalette97', 'colors': [color("#FCA100"), color("#E93B51"), color("#990000"), color("#2F0000"),] },
+		{ 'name': 'RandomPalette98', 'colors': [color("#E6DDB2"), color("#000000"),] },
+		{ 'name': 'qoa01p102', 'colors': [color("#CB1528"), color("#4D0F1B"), color("#100F11"),] },
+		{ 'name': 'qoa01p103', 'colors': [color("#FFE0DB"), color("#DC7381"), color("#D01028"), color("#8A232F"),] },
+		{ 'name': 'qoa01p104', 'colors': [color("#A89852"), color("#988C53"), color("#514A33"), color("#000000"),] },
+		{ 'name': 'qoa01p107', 'colors': [color("#FF9889"), color("#D78786"), color("#CD635F"), color("#100C00"),] },
+		{ 'name': 'qoa01p108', 'colors': [color("#FDC982"), color("#BD6B6A"), color("#B43931"), color("#8B0000"), color("#000000"),] },
+		{ 'name': 'qoa01p110', 'colors': [color("#FDC982"), color("#BD6B6A"), color("#8B0000"),] },
+		// { 'name': 'Blue Steel', 'colors': [color("#EFE7ED"), color("#6881C0"), color("#1E5090"),] },
+		{ 'name': 'qoa01p112', 'colors': [color("#FF181F"), color("#A00F12"), color("#850B10"), color("#532D1F"), color("#422D1F"), color("#610407"), color("#490305"), color("#3A0203"),] },
+		// { 'name': 'Blood Glow', 'colors': [color("#FF181F"), color("#850B10"), color("#532D1F"), color("#422D1F"), color("#610407"), color("#3A0203"),] },
+		// { 'name': 'Dark Spell', 'colors': [color("#FF181F"), color("#422D1F"), color("#610407"), color("#3A0203"),] },
+		// { 'name': 'Vampire', 'colors': [color("#CB1528"), color("#4D0F1B"), color("#100F11"),] },
+		{ 'name': 'qoa01p116', 'colors': [color("#BBD5FD"), color("#7A94D4"), color("#000000"),] },
+	]
 	save_palettes = [
 		{ 'name': 'dreamingcity', 'colors': [color("#E89B38"), color("#5CA3A6"), color("#020106"),] },
 		{ 'name': 'solaris', 'colors': [color("#F1DFBD"), color("#EBD048"), color("#599891"), color("#6D9E3D"), color("#5D487A"),] },
@@ -142,7 +231,16 @@ function setup() {
 	]
 	gchain_palettes = [
 	]
-	createCanvas(DIM, DIM);
+	if (windowWidth / windowHeight < ASPECT) {
+		W = windowWidth
+		H = windowWidth / ASPECT
+	} else {
+		H = windowHeight
+		W = windowHeight * ASPECT
+	}
+	console.log("W, H" + W + "," + H)
+	createCanvas(W, H);
+	// createCanvas(DIM, DIM);
 	//   background(200);
 
 	palettes = normie_palettes;
@@ -159,6 +257,7 @@ function setup() {
 	} else {
 		palettes = normie_palettes;
 	}
+	palettes = qoa_palettess
 	//   palettes = ultra_rare_palettes;
 	//   palettes = super_rare_palettes;
 	//   palettes = rare_palettes;
@@ -194,15 +293,21 @@ function setup() {
 	startAngleOptions.push.apply(startAngleOptions, extraEightAngles);
 	console.log("startAngles", startAngleOptions)
 	startingAngles.push(startAngleOptions[ibtw(0, startAngleOptions.length)]);
-	recursionDepth = 2;//4
-	if (p(.1)) {
+	tAngles.push(rFrom(startAngleOptions));
+	recursionDepth = 4;
+	if (p(.05)) {
 		recursionDepth = 2;
-	} else if (p(.33)) {
+	} else if (p(.275)) {
 		recursionDepth = 3;
+	}
+	triangleAimMode = 2
+	if (p(.5)) {
+		triangleAimMode = 1; //radial
 	}
 	let orbitalsPattern = ""
 	let matchRadii = p(.5);
 	let uniformAngle = p(.33);
+	let uniformTangle = p(.00033);
 
 	radialSymmetry = p(.10);
 	FILO = p(.80);
@@ -211,7 +316,9 @@ function setup() {
 		radii.push(matchRadii ? scalars[-1] : fbtw(.1, .6));
 		orbitals.push(orbitalOptions[ibtw(0, orbitalOptions.length)]);
 		startingAngles.push(uniformAngle ? startingAngles[0] : startAngleOptions[ibtw(0, startAngleOptions.length)]);
+		tAngles.push(uniformTangle ? tAngles[0] : rFrom(startAngleOptions));
 	}
+	console.log("All tAngleS: " + tAngles)
 	for (let i = orbitals.length - 1; i >= 0; i--) {
 		orbitalsPattern += orbitals[i]
 		if (i > 0) {
@@ -222,7 +329,7 @@ function setup() {
 	window.$fxhashFeatures = {
 		"Palette": palettes[paletteInx]["name"],
 		// "Mode": hanging ? "Suspended" : "Floating",
-		"Space Mode": spaceMode ? "Space" : "Sky",
+		"Sky Mode": spaceMode ? "Space" : "Sky",
 		"Orbital Pattern": orbitalsPattern,
 		"Recusion Depth": int(recursionDepth),
 		"Radial Symmetry": radialSymmetry ? "Yes" : "No",
@@ -241,13 +348,13 @@ function draw() {
 	// gradients.push(ringGradient());
 	// gradients.push(ringGradient());
 	gradients.push(triangleGradient());
-	gradients.push(triangleGradient());
+	gradients.push(ringGradient());
 	gradients.push(triangleGradient());
 	// image(gradients[0], 0, 0, DIM, DIM);
 	console.log(window.$fxhashFeatures)
 	mask = getMask(DIM);
 	let center = [DIM / 2, DIM / 2]
-	let rad = DIM / ibtw(2, 5);
+	let rad = DIM / ibtw(2, 15);
 	mask.triangle(...getTrianglePoints(center[0], center[1], rad, PI / 2))
 	// mask.circle(center[0], center[1], rad);
 	// console.log("recursionDepth in Draw: ", recursionDepth);
@@ -267,32 +374,53 @@ function drawOrbitals(parentAngle, _center, _rad, _n) {
 	if (_n <= 0) return;
 	var currAngle = radialSymmetry ? parentAngle : startingAngles[_n - 1];
 	var rotationRadians = (PI * 2) / orbitals[_n - 1];
-
+	let radShift = _rad * .08
+	let currRad = _rad
+	let distShift = _rad * .1
+	let currDist = _rad
 	for (let o = 0; o < orbitals[_n - 1]; o++) {
-		let ox = _center[0] + _rad * cos(currAngle);
-		let oy = _center[1] + _rad * sin(currAngle);
-		let orad = _rad * scalars[_n - 1]
+
+		// let ox = _center[0] + _rad * cos(currAngle);
+		// let oy = _center[1] + _rad * sin(currAngle);
+		let ox = _center[0] + currDist * cos(currAngle);
+		let oy = _center[1] + currDist * sin(currAngle);
+		// let orad = _rad * scalars[_n - 1]
+		let orad = currRad * scalars[_n - 1]
 		let gIdx = _n % 2 == 1 ? gradientFlipIndex : 1;
 		let newCenter = [ox, oy];
-		if (!FILO) drawSingleOrbital(orad, newCenter, gIdx);
+		if (!FILO) drawSingleOrbital(orad, newCenter, gIdx, _n);
 		drawOrbitals(currAngle, newCenter, orad, _n - 1);
-		if (FILO) drawSingleOrbital(orad, newCenter, gIdx);
+		if (FILO) drawSingleOrbital(orad, newCenter, gIdx, _n);
 		currAngle += rotationRadians;
+		currRad += radShift;
+		currDist += distShift;
 	}
 }
-function drawSingleOrbital(orad, _center, _gIdx) {
+function drawSingleOrbital(orad, _center, _gIdx, _depth) {
 	let [ox, oy] = _center;
+	// console.log("tAngles ", tAngles + " depth: " + _depth)
+	// console.log("tAngles[_depth] ", tAngles[_depth])
+	let a = tAngles[_depth]
+	if (triangleAimMode == 1) {
+		a = atan2(oy - DIM / 2, ox - DIM / 2)
+	} else if (triangleAimMode == 2) {
+		a = atan2(DIM / 2 - oy, DIM / 2 - ox)
+	}
+
 	if (orad < 20) {
 		noStroke();
 		fill(gradients[_gIdx].get(ox, oy));
-		triangle(...getTrianglePoints(ox, oy, orad, PI / 2));
+		triangle(...getTrianglePoints(ox, oy, orad, a));
 		// circle(ox, oy, orad)
 	} else {
 		let omask = getMask(DIM);
-		omask.triangle(...getTrianglePoints(ox, oy, orad, PI / 2));
+		omask.triangle(...getTrianglePoints(ox, oy, orad, a));
 		// omask.circle(ox, oy, orad);
 		applyMask(gradients[_gIdx], omask);
 	}
+}
+function rFrom(l) {
+	return l[ibtw(0, l.length)]
 }
 function getMask(DIM) {
 	var mask = createGraphics(DIM, DIM);
@@ -302,7 +430,7 @@ function getMask(DIM) {
 }
 function triangleGradient() {
 	var gradientCanvas = createGraphics(DIM, DIM);
-	const numRings = clrs.length * ibtw(1, 4);
+	const numRings = p(.05) ? clrs.length * ibtw(1, 4) : clrs.length * ibtw(5, 10);
 	// console.log("numRings", numRings)
 	var vertex = [ibtw(0, DIM), ibtw(0, DIM)];
 	// console.log("gradient vertex", vertex)
@@ -314,6 +442,9 @@ function triangleGradient() {
 	let currRadius = startRadius;
 	gradientCanvas.noStroke();
 	var i = 0;
+	let startAngle = rFrom(startAngleOptions)
+	let currAngle = startAngle;
+	let angleInc = (2 * PI) / 128;//16,32,52,104
 	// for (let i = 0; i < numRings; i++) {
 	while (currRadius > 0) {
 		c1 = clrs[i % clrs.length];
@@ -328,12 +459,13 @@ function triangleGradient() {
 			let c = lerpColor(c1, c2, diff);
 			gradientCanvas.fill(c);
 			// gradientCanvas.circle(vertex[0], vertex[1], currRadius, currRadius);
-			gradientCanvas.triangle(...getTrianglePoints(vertex[0], vertex[1], currRadius, PI / 2));
+			gradientCanvas.triangle(...getTrianglePoints(vertex[0], vertex[1], currRadius, currAngle));
 			// fill(c);
 			// circle(vertex[0], vertex[1], currRadius);
 			// console.log("currRaduis", currRadius)
 		}
 		i++;
+		currAngle += angleInc;
 
 	}
 	return gradientCanvas;
