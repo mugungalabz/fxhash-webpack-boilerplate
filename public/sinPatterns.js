@@ -60,15 +60,15 @@ class SinSquare {
             }
         } else if (this.mode == "SPIN") {
             let angle = atan((HEIGHT / 2) / (WIDTH / 2))
-            this.radius = (HEIGHT / 2 / sin(angle)) * .5
+            this.radius = (HEIGHT / 2 / sin(angle)) * 1.1//.5
             this.anchorPoints = [[this.v_x + cos(this.angles[0]) * this.radius, this.v_y + sin(this.angles[0]) * this.radius]]
             this.angles.push((this.angles[0] + PI / 2 + random() * PI / 2) % (2 * PI))
             this.anchorPoints.push([this.v_x + cos(this.angles[1]) * this.radius, this.v_y + sin(this.angles[1]) * this.radius])
-            if (dist(...this.anchorPoints[0], this.v_x, this.v_y) != this.radius) {
-                console.log("did not init the correct anchorPoint")
-                console.log("radius: " + this.radius)
-                console.log("dist(..." + (dist(...this.anchorPoints[0], this.v_x, this.v_y)))
-            }
+            // if (dist(...this.anchorPoints[0], this.v_x, this.v_y) != this.radius) {
+            //     console.log("did not init the correct anchorPoint")
+            //     console.log("radius: " + this.radius)
+            //     console.log("dist(..." + (dist(...this.anchorPoints[0], this.v_x, this.v_y)))
+            // }
             // console.log("this.anchorPoints @ init: " + this.anchorPoints)
         }
     }
@@ -167,8 +167,12 @@ class SinSquare {
                 if (curr_sin < 0) {
                     curr_y_variance *= (2 * (1 - curr_sin))
                 }
-                let y = ybase + curr_sin * this.mag// + vary(this.mag, curr_y_variance)
-                let x = xbase + curr_cos * this.mag
+                //PARTY MODE:
+                // let y = ybase + curr_sin * this.mag// + vary(this.mag, curr_y_variance)
+                // let x = xbase + curr_cos * this.mag
+                //END PARTY MODE
+                let y = ybase + curr_sin * sin(grade + PI / 2) * this.mag// + vary(this.mag, curr_y_variance)
+                let x = xbase + curr_sin * cos(grade + PI / 2) * this.mag
                 // let y = ybase //+ sin(grade + HALFPI) * (this.mag) //+ vary(this.mag, curr_y_variance))
                 // let x = xbase //+ cos(grade + HALFPI) * (this.mag) //+ vary(this.mag, curr_y_variance))
                 let curr_height = height_sin * height_sin * this.max_r
@@ -201,14 +205,18 @@ class SinSquare {
 function glitchSquare(c, x, y, r) {
     let curr_c = randomShiftHSL(c, 10, 10, 10)
     pct_offset = .075
-    // hueShift = rFrom([120,30])
-    hueShift = rFrom([20])
-    altC1 = shiftHSL(curr_c, hueShift * -1, 30, -50)
-    altC2 = shiftHSL(curr_c, hueShift, 30, -50)
+    // hueShift = rFrom([120,30, 20])
+    hueShift = rFrom([90])
+    altC1 = shiftHSL(curr_c, hueShift * -1, 30, 10) //-50 to darken
+    altC2 = shiftHSL(curr_c, hueShift, 30, 10)
     // altCI = saturate(rotateHue(c, -100), 30)
     // altC2 = saturate(rotateHue(c, 100), 30)
-    cube(wA(altC1, .3), x - r * pct_offset, y - r * pct_offset, r)
-    cube(wA(altC2, .3), x + r * pct_offset, y + r * pct_offset, r)
+    drawingContext.shadowOffsetX = 5;
+    drawingContext.shadowOffsetY = -5;
+    drawingContext.shadowBlur = 10;
+    drawingContext.shadowColor = wA(altC2, 1);
+    // cube(wA(altC1, .3), x - r * pct_offset, y - r * pct_offset, r)
+    // cube(wA(altC2, .3), x + r * pct_offset, y + r * pct_offset, r)
     cube(wA(curr_c, .75), x, y, r)
 }
 function createSinSquareRings() {
@@ -280,13 +288,13 @@ function createSinSquareLines() {
 function createSinSquareSpins() {
     let sinShapes = []
     let row_height = HEIGHT / colors.length
-    // for (let i = 0; i < colors.length; i++) {
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < colors.length; i++) {
+        // for (let i = 0; i < 2; i++) {
         currParms = {
             "clr": colors[i],
             "n": ibtw(minN, maxN),
-            // "mag": row_height / ibtw(3, 6),
-            "mag": HEIGHT / 10,
+            "mag": row_height / ibtw(3, 6),
+            // "mag": HEIGHT / 10, //party mode
             "cycles": ibtw(1, 3),
             "max_r": HEIGHT / rFrom([72, 64, 48,]),
             "min_r": HEIGHT / 512,

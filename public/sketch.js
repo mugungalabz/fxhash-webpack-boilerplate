@@ -97,8 +97,8 @@ function setup() {
 	sinSquares = []
 	sinSquares = sinSquares.concat(createSinSquareSpins())
 	// sinSquares = sinSquares.concat(createSinSquareLines())
-	// sinSquares = sinSquares.concat(createSinSquareRings())
-	sinSquares = shuffle(sinSquares)
+	sinSquares = sinSquares.concat(createSinSquareRings())
+	// sinSquares = shuffle(sinSquares)
 	console.log("total sinSquarePAtterns: " + sinSquares.length)
 	console.log("total squares: " + totalSinSquares)
 	rotatingCanvases = []
