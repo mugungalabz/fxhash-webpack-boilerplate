@@ -1,3 +1,5 @@
+var TWOPI;
+var HALFPI;
 function initMask() {
     maskCanvas = createGraphics(DIM, DIM)
     maskCanvas.noStroke()
@@ -42,14 +44,14 @@ function darken(c, n) {
 }
 function lighten(c, n) {
     if (n == null) console.log("LIGHTEN PARM NOT SPECIFIED")
-    return color(red(c) + n, green(c) + n, blue(c) + n)
+    return color(red(c) + n, green(c) + n, blue(c) + n, alpha(c))
 }
 function lightenHsl(c, d) {
-    return color(hue(c), saturation(c), lightness(c) + d)
+    return color(hue(c), saturation(c), lightness(c) + d, alpha(c))
 }
 function rotateHue(c, d) {
     while (d < 0) d += 360
-    return color((hue(c) + d) % 360, saturation(c), lightness(c))
+    return color((hue(c) + d) % 360, saturation(c), lightness(c), alpha(c))
 }
 function hc(c) {
     return "#" + hex(red(c)).substring(6, 8) + hex(green(c)).substring(6, 8) + hex(blue(c)).substring(6, 8)
@@ -76,7 +78,6 @@ function getAngleBetweenPoints(p1, p2) {
     return atan2(p2.y - p1.y, p2.x - p1.x);
 }
 function rFrom(list) {
-    console.log("rFrom")
     return list[ibtw(0, list.length)]
 }
 function randomShiftHSL(c, h, s, l) {
@@ -96,7 +97,7 @@ function wA(c, a) {
     // console.log("alpga: " + a)
     // let newc = color(red(c), green(c), blue(c), a)
     c.setAlpha(a)
-    // console.log("newc: " + newc)
+    // console.log("newc w alpha: " + c)
     return c
 }
 function getIntersectionOfTwoLines(l1, l2) {
@@ -142,4 +143,84 @@ function cube(c, x, y, r) {
     vertex(x + r + cos(PI / 4) * d, y - r - sin(PI / 4) * d)
     endShape()
 
+}
+class RadialSpinParm {
+    constructor(inc) {
+        this.val = random() * 2 * PI
+        this.inc = inc
+    }
+    increment() {
+        this.val += this.inc
+        if (this.val <= 0) {
+            this.val += (Math.abs(this.val / (2 * PI)) + 1) * 2 * PI
+        } else if (this.val > (2 * PI)) {
+            this.val -= (2 * PI) * (Math.abs(this.val) / (2 * PI))
+        }
+    }
+}
+class OscParm {
+    constructor(name, i, v, speed) {
+        // console.log("Creating " + name + "OscParm")
+        let otherBound = i * v
+        // console.log("i, v, other: " + i + "," + v + "," + otherBound)
+        this.lowerBound = Math.min(i, otherBound)
+        this.upperBound = Math.max(i, otherBound)
+        this.start = fbtw(this.lowerBound, this.upperBound)
+        this.val = this.start
+        this.speed = speed
+        if (Math.abs(this.upperBound - this.lowerBound) < .001) {
+            this.inc = 0
+        } else {
+            this.inc = Math.abs(this.upperBound - this.lowerBound) / speed
+        }
+        // this.print()
+    }
+    print() {
+        console.log("OscParm:")
+        console.log("   lowerBound: " + this.lowerBound)
+        console.log("   upperBound: " + this.upperBound)
+        console.log("   start: " + this.start)
+        console.log("   val: " + this.val)
+        console.log("   speed: " + this.speed)
+        console.log("   inc: " + this.inc)
+    }
+    increment() {
+        this.val += this.inc
+        if (this.val <= this.lowerBound || this.val >= this.upperBound) this.inc *= -1
+    }
+}
+
+function storePalette(palette) {
+    var paletteJson = JSON.parse(palettes);
+    paletteJson.add(palette)
+    //read palette json
+    //add palette to list
+    //save pa;ette json
+}
+
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
+
+function rotateAngle(angle, rotationRadians) {
+    let newAngle = angle + rotationRadians
+    if (newAngle < 0) {
+        newAngle = newAngle + (Math.floor(Math.abs(newAngle / TWOPI)) + 1) * TWOPI
+    } else {
+        newAngle = newAngle % TWOPI
+    }
+    if (newAngle < 0 || newAngle > TWOPI) {
+        console.log("new Angle calc didn't work: " + newAngle)
+        console.log("old angle/radians: " + angle + "/" + rotationRadians)
+    }
+    return newAngle
+}
+
+function calcXYonCircle(vX, vY, radius, angle) {
+    if (debug) {
+        console.log("angle: " + angle)
+        console.log("x/y: " + vX + "/" + vY)
+        console.log("radius: " + radius)
+    }
+    return [vX + cos(angle) * radius, vY + sin(angle) * radius]
 }

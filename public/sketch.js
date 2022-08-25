@@ -19,17 +19,11 @@
 //   "Number of lines": 10,
 //   "Inverted": true
 // }
-
-// import { get_palettes, get_palette } from paletteUtil
-// var rotatingLines = require('./rotatelines.js')
-
-// var RotatingLineCanvas = rotatingLines.RotatingLineCanvas
-// var RotatingLineLayer = rotatingLines.RotatingLineLayer
-// var sinPatterns = require('./sinPatterns.js')
-// var SinSquare = sinPatterns.SinSquare
-// // import { RotatingLineLayer } from './rotatelines.js';
-// import { SinSquare } from './sinPatterns.js';
-// var palette_util = require('./get_palettes.js')
+var debug = false
+var globalCounter = 0
+var maxSquares = 2000
+var maxN = 500;
+var minN = 50;
 var WIDTH = window.innerWidth
 var HEIGHT = window.innerHeight
 var DIM = Math.min(WIDTH, HEIGHT)
@@ -43,15 +37,7 @@ var clrs; var numOrbitals;
 const orbitalOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 var startAngleOptions;
 var hanging = false;
-// var startAngle;
-// var gradients = [];
-// var scalars = [];
-// var orbitals = [];
 var minIncrement;
-// var startingAngles = [];
-// var gradientFlipIndex;
-// var FILO;
-// var radialSymmetry;
 var colors;
 var NUM_COLORS;
 var reDraw
@@ -59,8 +45,9 @@ var paused
 var counter
 var refreshCount = 10
 var angleApproachThresholdPct = .08
-var numCanvas = 5
+var numCanvas = 1
 var sinSquares; var rotatingCanvases
+var totalSinSquares = 0
 
 // noprotect
 function setup() {
@@ -68,6 +55,8 @@ function setup() {
 	console.log("........")
 	console.log("HELLO SETUP + H/W: " + HEIGHT + "/" + WIDTH)
 	console.log("........")
+	TWOPI = 2 * PI
+	HALFPI = PI / 2
 	palette = get_palette()
 	glitch_palettes = [
 		{
@@ -88,8 +77,11 @@ function setup() {
 	NUM_COLORS = 5
 
 	colors = getGlitchColorHSL(NUM_COLORS, "ANALOGOUS", { degree: 80 })
-	colors = palette["colors"]
-	console.log("Colors: " + colors)
+	colors = shuffle(palette["colors"])
+	for (let i = 0; i < colors.length; i++) {
+		colors[i] = color(colors[i])
+	}
+	console.log("Num Colors: " + colors.length)
 	// colors = getGlitchColorHSL(NUM_COLORS, "SPLIT_COMPLIMENTARY", { degree: 80 })
 	background(13)
 	// colors = getGlitchColorHSL(palette.n, "ANALOGOUS", { degree: palette.degrees, seedColor: [palette.startHue, 80 + int(random() * 20), 50] })
@@ -99,9 +91,16 @@ function setup() {
 
 	reDraw = true; paused = false;
 	// background(colors[ibtw(0, colors.length)])
-
-	sinSquares = createSinSquareLines()
-	sinRings = createSinSquareRings()
+	let aveN = maxSquares / (colors.length)
+	minN = Math.min(aveN, minN)
+	maxN = Math.min(aveN, maxN)
+	sinSquares = []
+	sinSquares = sinSquares.concat(createSinSquareSpins())
+	// sinSquares = sinSquares.concat(createSinSquareLines())
+	// sinSquares = sinSquares.concat(createSinSquareRings())
+	sinSquares = shuffle(sinSquares)
+	console.log("total sinSquarePAtterns: " + sinSquares.length)
+	console.log("total squares: " + totalSinSquares)
 	rotatingCanvases = []
 	for (let i = 0; i < numCanvas; i++) {
 		let width = HEIGHT / numCanvas / 2
@@ -109,8 +108,8 @@ function setup() {
 		let upperBound = HEIGHT - lowerBound
 		// fill(colors[i][0])
 		rotatingCanvases.push(new RotatingLineCanvas([lowerBound, upperBound], [
-			new RotatingLineLayer(wA(rFrom(colors), 50), random(PI / 2), random(HEIGHT / 100, HEIGHT / 20), randomIncrement(PI / 40), random(0, 1), angleApproachThresholdPct, [0, PI / 2]),
-			new RotatingLineLayer(wA(rFrom(colors), 50), random(PI / 2) + PI / 2, random(HEIGHT / 100, HEIGHT / 20), randomIncrement(PI / 40), random(0, 1), angleApproachThresholdPct, [PI / 2, PI])
+			new RotatingLineLayer(wA(rFrom(colors), 15), random(PI / 2), random(HEIGHT / 100, HEIGHT / 20), randomIncrement(PI / 40), random(0, 1), angleApproachThresholdPct, [0, PI / 2]),
+			new RotatingLineLayer(wA(rFrom(colors), 15), random(PI / 2) + PI / 2, random(HEIGHT / 100, HEIGHT / 20), randomIncrement(PI / 40), random(0, 1), angleApproachThresholdPct, [PI / 2, PI])
 		]))
 	}
 	window.$fxhashFeatures = {
@@ -125,17 +124,17 @@ function setup() {
 }
 
 function keyPressed() {
-	if (keyCode == 83) {
+	if (keyCode == 83) { //s
 		saveCanvas(fxhash, 'png');
+	} else if (keyCode == 80) { //p
+		storePalette(palette)
+	} else if (keyCode == 78) {//n
+		noLoop()
+	} else if (keyCode == 68) { //d
+		debug = !debug
 	}
 }
 function draw() {
-	// console.log("...........")
-	// console.log("HELLO DRAW")
-	// console.log("..........")
-	// background(1)
-
-
 
 	if (reDraw) {
 		// squares()
@@ -151,21 +150,19 @@ function draw() {
 		if (counter <= 0) reDraw = true
 	}
 	rectMode(RADIUS)
+	// sinSquares = shuffle(sinSquares)
 	for (sinSquare of sinSquares) {
 		sinSquare.draw()
 	}
-	for (sinRing of sinRings) {
-		sinRing.draw()
-	}
-	// noLoop()
+	globalCounter++
+	// if (globalCounter > 20) {
+	// 	noLoop()
+	// }
 
 	// fxpreview(); TODO add logic for the preview
 	// noLoop();
 }
 
-// function vary(base, variance) {
-// 	return base + (random() * variance) * (random() < .5 ? 1 : -1)
-// }
 
 function lineMist(c, sw) {
 	let x = random() * DIM * (1 / 2);// + DIM/4;
@@ -386,7 +383,6 @@ function getGlitchColorHSL(n, mode, options) {
 			}
 			break;
 	}
-	console.log("HSLColors creeated:" + hslColors)
 	// hslVals = [random()*360,80+int(random()*20),50]
 	// hslVals[0] = int(random()*360);
 	return hslColors;

@@ -34,8 +34,8 @@ class RotatingLineCanvas {
 }
 class RotatingLineLayer {
     constructor(color, angle, increment, angleIncrement, incrementVariance, angleApproachThresholdPct, angleBounds) {
-        this.color = color,
-            this.angle = angle
+        this.color = color
+        this.angle = angle
         this.increment = increment
         this.angleIncrement = angleIncrement
         this.incrementVariance = incrementVariance
@@ -46,7 +46,6 @@ class RotatingLineLayer {
             this.angleBounds[1] -= this.angleApproachThresholdPct * PI / 2
         ]
 
-        console.log("Rotating Line AngleBounds: " + this.angleBounds)
     }
     drawLayer(bounds, linesToDraw) {
 
@@ -85,50 +84,32 @@ function gridLinesSquare(start, end, increment, angle, incVar, clr, linesToDraw)
 }
 
 function drawSquareOfLinesBottomLeft(start, end, increment, angle, incVar, clr, linesToDraw) {
-    // console.log("drawSquare of Linesbottom")
-    // console.log("sTart: " + start)
-    // console.log("end: " + end)
     let drawAngle = angle - PI / 2
     let xincrement = abs(increment / tan(angle))
     let xStart = end - floor((end - start) / xincrement) * xincrement
     for (let x = xStart; x < end; x += xincrement) {
-        // for (let x = xStart; x < end; x += vary(xincrement, incVar)) {
         let angleToEndCorner = angleBetweenPoints(x, start, start, end)
         if (angleToEndCorner < angle) {
             linesToDraw.push([[x, start, start, ((x - start) / tan(drawAngle) + start)], clr, random()])
-            // line(x, start, start, ((x-start)/tan(drawAngle)+start))
         } else {
             linesToDraw.push([[x, start, (end - start) / tan(angle) + x, end], clr, random()])
-            // line(x, start, (end-start)/tan(angle)+x, end)
         }
     }
-    // for (let y = start; y < end; y += vary(increment, incVar)) {
     for (let y = start; y < end; y += increment) {
         let angleToEndCorner = angleBetweenPoints(end, y, start, end)
         if (angleToEndCorner > angle) {
             //hit bottom edge
             linesToDraw.push([[end, y, end - tan(drawAngle) * (end - y), end], clr, random()])
-            // line(end, y, end-tan(drawAngle)*(end-y), end)
-            // line(start, y, end, (end-start)/tan(angle)+y)
         }
         else {
             //hit left edge
             linesToDraw.push([[end, y, start, (end - start) / tan(drawAngle) + y], clr, random()])
-            // line(end, y, start, (end-start)/tan(drawAngle)+y)
         }
     }
 }
 function drawSquareOfLinesBottomRight(start, end, increment, angle, incVar, clr, linesToDraw) {
     let xincrement = abs(increment / tan(angle))
     let xStart = start + floor((end - start) / xincrement) * xincrement
-    // if (xincrement <= 1) {
-    //     console.log("angle: " + angle)
-    //     console.log("xincrement: " + xincrement)
-    //     console.log("increment: " + increment)
-    //     console.log("tan(angle): " + tan(angle))
-    // }
-    // console.log("X Right to Left Bottom Right")
-    // for (let x = xStart; x > start; x -= vary(xincrement, incVar)) {
     for (let x = xStart; x > start; x -= xincrement) {
         let angleToEndCorner = angleBetweenPoints(x, start, end, end)
         if (angleToEndCorner > angle) {
@@ -139,7 +120,6 @@ function drawSquareOfLinesBottomRight(start, end, increment, angle, incVar, clr,
             linesToDraw.push([[x, start, (end - start) / tan(angle) + x, end], clr, random()])
         }
     }
-    console.log("Y Top  to Bottom,  Bottom Right")
     for (let y = start; y < end; y += increment) {
         // for (let y = start; y < end; y += vary(increment, incVar)) {
         let angleToEndCorner = angleBetweenPoints(start, y, end, end)
