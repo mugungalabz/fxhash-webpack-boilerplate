@@ -9,7 +9,7 @@ function get_palette() {
     let RARE = 0.15; //.14
     if (paletteTier <= ULTRA) {
 
-        return get_random_palette(palettes, "Earthen")
+        return get_random_palette(palettes, "save_palettes")
         // return get_random_palette(palettes, "ultra_rare_palettes")
         // palettes = ultra_rare_palettes;
     } else if (paletteTier <= SUPER) {
@@ -21,7 +21,7 @@ function get_palette() {
         return get_random_palette(palettes, "normie_palettes")
         // palettes = rare_palettes;
     } else {
-        return get_random_palette(palettes, "save_palettes")
+        return get_random_palette(palettes, "qoa_palettess")
         // return get_random_palette(palettes, "normie_palettes")
         // palettes = normie_palettes;
     }
@@ -48,6 +48,71 @@ function get_palettes() {
                 "#416AA0",
             ]
         }
+    ]
+    palettes["qoa_palettess"] = [
+        { 'name': 'Flamingo', 'colors': [color("#F2D6A9"), color("#F89683"), color("#D8807F"), color("#CF514C"),] },
+        { 'name': 'Rose Garden', 'colors': [color("#FFF8F5"), color("#F06E99"), color("#F02232"),] },
+        { 'name': 'Hawaii', 'colors': [color("#FE6579"), color("#FEAE00"), color("#F72447"), color("#694E50"),] },
+        { 'name': 'Miami', 'colors': [color("#FFFFDC"), color("#CB5A7A"), color("#5D276C"), color("#000000"),] },
+        { 'name': 'Thrall Soul', 'colors': [color("#A89852"), color("#514A33"), color("#000000"),] },
+        { 'name': 'Innocence', 'colors': [color("#FFDF84"), color("#F07E9C"), color("#D9566B"),] },
+        { 'name': 'Starburst', 'colors': [color("#FFCB00"), color("#FFA100"), color("#FF6C14"), color("#F44219"), color("#E40045"),] },
+        { 'name': 'Bouquet', 'colors': [color("#F8E1CB"), color("#C2586F"), color("#BB315C"), color("#AD152E"), color("#590E14"),] },
+        { 'name': 'Beehive', 'colors': [color("#FEDC2C"), color("#EFCA46"), color("#D8AD23"), color("#251C02"),] },
+        { 'name': "Tiger's Eye", 'colors': [color("#F7EA27"), color("#DC6D0C"), color("#1A1003"),] },
+        { 'name': 'Reich', 'colors': [color("#FAF5D9"), color("#EA0000"), color("#000000"),] },
+        { 'name': 'Candle Glow', 'colors': [color("#FBE66E"), color("#1F1D15"),] },
+        { 'name': 'Spring Sky', 'colors': [color("#FF92BA"), color("#BE569D"), color("#4695D3"), color("#9A316A"), color("#370029"),] },
+        { 'name': 'Glow', 'colors': [color("#97FABE"), color("#D58CC3"), color("#63276D"), color("#003941"),] },
+        { 'name': 'Devil Elf', 'colors': [color("#FFFFF1"), color("#E00000"), color("#003000"), color("#000000"),] },
+        { 'name': 'Nation', 'colors': [color("#FFFFF1"), color("#E00000"), color("#000000"),] },
+        { 'name': 'Steel', 'colors': [color("#FAE4B8"), color("#754B0D"), color("#02020C"),] },
+        { 'name': "90's", 'colors': [color("#F375CF"), color("#04BBFC"), color("#000000"),] },
+        { 'name': 'Newborn', 'colors': [color("#FFF0C7"), color("#B36497"), color("#0095BB"), color("#00597E"),] },
+        { 'name': 'Ghoul', 'colors': [color("#E4EEC7"), color("#0E0E0E"),] },
+        { 'name': 'Solar Flare', 'colors': [color("#FBDC87"), color("#797540"), color("#22210A"),] },
+        { 'name': 'Moth', 'colors': [color("#FBDC87"), color("#797540"), color("#22210A"),] },
+        { 'name': 'Machine', 'colors': [color("#FDD596"), color("#D40000"), color("#000000"),] },
+        { 'name': 'Static', 'colors': [color("#FBFCDF"), color("#B1AF99"), color("#706F5B"), color("#2A290E"),] },
+        { 'name': 'Tropic Fruit', 'colors': [color("#FCEA38"), color("#F8822A"), color("#EE2A3A"), color("#030A21"),] },
+        { 'name': 'Shriek', 'colors': [color("#FFDBAA"), color("#E9003B"), color("#8D133A"), color("#D80000"),] },
+        { 'name': 'Funfetti', 'colors': [color("#FFD596"), color("#FF7295"), color("#4491B6"), color("#981C61"), color("#3D132C"),] },
+        { 'name': 'Lilac', 'colors': [color("#FFD69F"), color("#FF728B"), color("#9B2975"), color("#7A0040"),] },
+        { 'name': 'Goldrush', 'colors': [color("#FEDC9B"), color("#694C06"),] },
+        { 'name': 'Icecap', 'colors': [color("#FEEECB"), color("#75B4BF"), color("#095F83"), color("#00327C"),] },
+        { 'name': 'Vogue', 'colors': [color("#FFFFA0"), color("#FF9682"), color("#DF7F7D"), color("#D3463F"), color("#A41400"), color("#000000"),] },
+        { 'name': 'Lush', 'colors': [color("#E7D9C2"), color("#D5839B"), color("#66265C"), color("#460033"),] },
+        { 'name': 'Iron', 'colors': [color("#FFBC77"), color("#957A53"), color("#151415"),] },
+        { 'name': 'Perfume', 'colors': [color("#F2D6A9"), color("#F89683"), color("#D8807F"), color("#CF514C"), color("#000000"),] },
+        { 'name': 'Rave', 'colors': [color("#25A8FC"), color("#ED0060"), color("#000025"),] },
+        { 'name': 'Mango', 'colors': [color("#FFD124"), color("#EB9215"), color("#0F1321"),] },
+        { 'name': 'Metallurgy', 'colors': [color("#FDE4A2"), color("#36677A"), color("#746E00"), color("#0F0000"),] },
+        { 'name': 'Icycle', 'colors': [color("#FDE4A2"), color("#36677A"), color("#0F0000"),] },
+        { 'name': 'RandomPalette86', 'colors': [color("#FBDFBB"), color("#FD9DA0"), color("#C3667E"), color("#7F5182"), color("#040809"),] },
+        { 'name': 'Flank Attack', 'colors': [color("#E59AD0"), color("#DB0020"), color("#00304B"),] },
+        { 'name': 'Gemstone', 'colors': [color("#FFD430"), color("#E1672A"), color("#D4442A"), color("#CD2C37"), color("#C51846"), color("#0A1020"),] },
+        { 'name': 'Radiance', 'colors': [color("#FFD430"), color("#E1672A"), color("#D4442A"), color("#C51846"), color("#0A1020"),] },
+        { 'name': 'Psychopsilociben', 'colors': [color("#FFD430"), color("#E1672A"), color("#C51846"), color("#0A1020"),] },
+        { 'name': 'Ghost', 'colors': [color("#FDECBB"), color("#160D14"),] },
+        { 'name': 'Ravishing', 'colors': [color("#FFA7B4"), color("#F478A2"), color("#AA5A8E"), color("#89395F"), color("#310E23"),] },
+        { 'name': 'Platinum', 'colors': [color("#FDFCFD"), color("#A8A8A8"), color("#5F5F5F"), color("#4A4A4A"), color("#080808"),] },
+        { 'name': 'Tribal Victory Dance', 'colors': [color("#FCA100"), color("#E93B51"), color("#990000"), color("#2F0000"),] },
+        { 'name': 'Blood Ritual', 'colors': [color("#CB1528"), color("#4D0F1B"), color("#100F11"),] },
+        { 'name': 'Valentine', 'colors': [color("#FFE0DB"), color("#DC7381"), color("#D01028"), color("#8A232F"),] },
+        { 'name': 'Mesmerize', 'colors': [color("#FDC982"), color("#BD6B6A"), color("#B43931"), color("#8B0000"), color("#000000"),] },
+        { 'name': 'Blue Steel', 'colors': [color("#EFE7ED"), color("#6881C0"), color("#1E5090"),] },
+        { 'name': 'Blood Glow', 'colors': [color("#FF181F"), color("#850B10"), color("#532D1F"), color("#422D1F"), color("#610407"), color("#3A0203"),] },
+        { 'name': 'Dark Spell', 'colors': [color("#FF181F"), color("#422D1F"), color("#610407"), color("#3A0203"),] },
+        { 'name': 'Vampire', 'colors': [color("#CB1528"), color("#4D0F1B"), color("#100F11"),] },
+        { 'name': 'Frozen', 'colors': [color("#BBD5FD"), color("#7A94D4"), color("#000000"),] },
+        { 'name': 'Jazz Club', 'colors': [color("#BD6684"), color("#B4566D"), color("#B34556"), color("#943D42"), color("#374D86"), color("#2D3C70"), color("#2B3754"), color("#49303C"), color("#392B24")] },
+        { 'name': 'Celestial Savannah', 'colors': [color("#E1B658"), color("#F3A326"), color("#C6784A"), color("#E86C22"), color("#A15F3C"), color("#26838A"), color("#8A5C20"), color("#AB141B"), color("#7A2022"), color("#643F15"), color("#284549")] },
+        { 'name': 'Bloom Nebula', 'colors': [color("#F5D18B"), color("#00806F"), color("#005859"), color("#520027"),] },
+        { 'name': 'Raven', 'colors': [color("#E89B38"), color("#5CA3A6"), color("#020106"),] },
+        { 'name': 'Dream Pool', 'colors': [color("#BF9FB2"), color("#BFB287"), color("#94627E"), color("#4B7E82"), color("#54697B"), color("#3C2834"),] },
+        { 'name': 'Space Flamingo', 'colors': [color("#EA9CB7"), color("#936DA6"), color("#BE5567"), color("#250000"),] },
+        { 'name': 'Heartbreak', 'colors': [color("#C8A072"), color("#A51830"), color("#991418"), color("#62222F"),] },
+
     ]
     palettes["save_palettes"] = [
         { 'name': 'dreamingcity', 'colors': [color("#E89B38"), color("#5CA3A6"), color("#020106"),] },
@@ -122,7 +187,7 @@ function get_palettes() {
     palettes["normie_palettes"] = [
         { 'name': 'Mad Hatter', 'colors': [color("#C48461"), color("#999766"), color("#A69359"), color("#A99A45"), color("#B27759"), color("#8D8963"), color("#978555"), color("#9A8E44"), color("#A67D45"), color("#85795F"), color("#AD6A40"), color("#9A7E35"), color("#806D4D"), color("#A17423"), color("#6D6B5C"), color("#8A7232"), color("#916A25"), color("#7D5C3D"), color("#6C5C4C"), color("#82612B"), color("#6E552C"), color("#7B5419"), color("#8B5500"), color("#67481A"), color("#794B00"), color("#723600"), color("#5D2A00"), color("#2A2A2A"),] },
         { 'name': 'Gemstone Nebulae', 'colors': [color("#F1DCC0"), color("#C43055"), color("#009FA2"), color("#492148"),] },
-        { 'name': 'Rainforest Galaxy', 'colors': [color("#F3EDBF"), color("#CDD05E"), color("#53834F"), color("#734566"), color("#31687D"), color("#42432A"), color("#0A0A0C"),] },
+        // { 'name': 'Rainforest Galaxy', 'colors': [color("#F3EDBF"), color("#CDD05E"), color("#53834F"), color("#734566"), color("#31687D"), color("#42432A"), color("#0A0A0C"),] },
         { 'name': 'Moon', 'colors': [color("#C2BDB0"), color("#868079"), color("#443E3E"), color("#3E3D31"), color("#040302"),] },
         { 'name': 'Stardust', 'colors': [color("#E5827E"), color("#153D56"), color("#0B253D"),] },
         { 'name': 'Sugar', 'colors': [color("#E3909F"), color("#C7829F"), color("#A25686"), color("#5F7F96"), color("#3B2733"),] },

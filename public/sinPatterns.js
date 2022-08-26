@@ -60,7 +60,7 @@ class SinSquare {
             }
         } else if (this.mode == "SPIN") {
             let angle = atan((HEIGHT / 2) / (WIDTH / 2))
-            this.radius = (HEIGHT / 2 / sin(angle)) * 1.1//.5
+            this.radius = (HEIGHT / 2 / sin(angle)) * .5//.5
             this.anchorPoints = [[this.v_x + cos(this.angles[0]) * this.radius, this.v_y + sin(this.angles[0]) * this.radius]]
             this.angles.push((this.angles[0] + PI / 2 + random() * PI / 2) % (2 * PI))
             this.anchorPoints.push([this.v_x + cos(this.angles[1]) * this.radius, this.v_y + sin(this.angles[1]) * this.radius])
@@ -211,12 +211,12 @@ function glitchSquare(c, x, y, r) {
     altC2 = shiftHSL(curr_c, hueShift, 30, 10)
     // altCI = saturate(rotateHue(c, -100), 30)
     // altC2 = saturate(rotateHue(c, 100), 30)
-    drawingContext.shadowOffsetX = 5;
-    drawingContext.shadowOffsetY = -5;
-    drawingContext.shadowBlur = 10;
-    drawingContext.shadowColor = wA(altC2, 1);
-    // cube(wA(altC1, .3), x - r * pct_offset, y - r * pct_offset, r)
-    // cube(wA(altC2, .3), x + r * pct_offset, y + r * pct_offset, r)
+    // drawingContext.shadowOffsetX = 5;
+    // drawingContext.shadowOffsetY = -5;
+    // drawingContext.shadowBlur = 10;
+    // drawingContext.shadowColor = wA(altC2, 1);
+    cube(wA(altC1, .3), x - r * pct_offset, y - r * pct_offset, r)
+    cube(wA(altC2, .3), x + r * pct_offset, y + r * pct_offset, r)
     cube(wA(curr_c, .75), x, y, r)
 }
 function createSinSquareRings() {
@@ -285,18 +285,27 @@ function createSinSquareLines() {
     return sinShapes
 }
 
-function createSinSquareSpins() {
+function createSinSquareSpins(mode) {
     let sinShapes = []
     let row_height = HEIGHT / colors.length
     for (let i = 0; i < colors.length; i++) {
         // for (let i = 0; i < 2; i++) {
+        let max_r_options = [72, 64, 48,]
+        let cycle_options = [1, 3]
+        let mag_options = [1, 10]
+        if (mode == "SMALL") {
+            max_r_options = [HEIGHT, HEIGHT / 2, HEIGHT / 3,]
+            // max_r_options = [256, 175, 148,]
+            cycle_options = [1, 10]
+            mag_options = [3, 16]
+        }
         currParms = {
             "clr": colors[i],
             "n": ibtw(minN, maxN),
-            "mag": row_height / ibtw(3, 6),
+            "mag": row_height / ibtw(...mag_options),
             // "mag": HEIGHT / 10, //party mode
-            "cycles": ibtw(1, 3),
-            "max_r": HEIGHT / rFrom([72, 64, 48,]),
+            "cycles": ibtw(...cycle_options),
+            "max_r": HEIGHT / rFrom(max_r_options),
             "min_r": HEIGHT / 512,
             "y_variance_mag": 0,//.15,
             "offset": random() * 2 * PI,
@@ -306,7 +315,7 @@ function createSinSquareSpins() {
             "ripple": new RadialSpinParm(fbtw(PI / -8, PI / 8)),
             "v_x": DIM / 2,
             "v_y": DIM / 2,
-            "spinSpeeds": [fbtw(PI / -64, PI / 64), fbtw(PI / -64, PI / 64)]
+            "spinSpeeds": [fbtw(PI / -256, PI / 256), fbtw(PI / -256, PI / 256)]
         }
         totalSinSquares += currParms["n"]
         sinShapes.push(new SinSquare(currParms))

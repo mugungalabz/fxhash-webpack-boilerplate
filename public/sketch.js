@@ -95,9 +95,10 @@ function setup() {
 	minN = Math.min(aveN, minN)
 	maxN = Math.min(aveN, maxN)
 	sinSquares = []
-	sinSquares = sinSquares.concat(createSinSquareSpins())
+	// sinSquares = sinSquares.concat(createSinSquareSpins("MEDIUM"))
+	sinSquares = sinSquares.concat(createSinSquareSpins("SMALL"))
 	// sinSquares = sinSquares.concat(createSinSquareLines())
-	sinSquares = sinSquares.concat(createSinSquareRings())
+	// sinSquares = sinSquares.concat(createSinSquareRings())
 	// sinSquares = shuffle(sinSquares)
 	console.log("total sinSquarePAtterns: " + sinSquares.length)
 	console.log("total squares: " + totalSinSquares)
