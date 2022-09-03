@@ -10,7 +10,9 @@
     "start": "webpack serve --config ./config/webpack.config.dev.js"
   },
   "dependencies": {
-    "paletteUtil": "file:../public/palettes"
+    "fs": "^0.0.1-security",
+    "gifencoder": "^2.0.1",
+    "minify": "^9.1.0"
   },
   "devDependencies": {
     "adm-zip": "^0.5.9",

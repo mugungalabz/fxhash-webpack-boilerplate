@@ -20,14 +20,18 @@
 //   "Inverted": true
 // }
 var debug = false
+var captureGifFrames = false
+var gifFrames = 100
+var gifFrameCounter = 0
 var globalCounter = 0
 var maxSquares = 2000
-var maxN = 500;
-var minN = 50;
+var maxN = 40;
+var minN = 10;
 var WIDTH = window.innerWidth
 var HEIGHT = window.innerHeight
 var DIM = Math.min(WIDTH, HEIGHT)
 var palette; var clrs;
+var currDay; var birthday; var birthdayOffset
 // var hashIdx = 1; var maxHashIdx; var minHashIdx =2;
 var maskCanvas;
 const minTriangleHeight = 1;
@@ -43,12 +47,11 @@ var NUM_COLORS;
 var reDraw
 var paused
 var counter
-var refreshCount = 10
+var refreshCount = 20
 var angleApproachThresholdPct = .08
 var numCanvas = 1
 var sinSquares; var rotatingCanvases
 var totalSinSquares = 0
-
 // noprotect
 function setup() {
 	// palettes = get_palettes()
@@ -57,6 +60,7 @@ function setup() {
 	console.log("........")
 	TWOPI = 2 * PI
 	HALFPI = PI / 2
+	colorMode(HSL)
 	palette = get_palette()
 	glitch_palettes = [
 		{
@@ -73,44 +77,113 @@ function setup() {
 	// console.log("palette" + palette)
 
 	console.log("palette", palette)
-	colorMode(HSL)
+
 	NUM_COLORS = 5
 
-	colors = getGlitchColorHSL(NUM_COLORS, "ANALOGOUS", { degree: 80 })
+	// colors = getGlitchColorHSL(NUM_COLORS, "SPLIT", { degree: 80 })
+	// colors = getGlitchColorHSL(NUM_COLORS, "ANALOGOUS", { degree: 80 })
+	console.log("palette['colors'] " + palette["colors"])
 	colors = shuffle(palette["colors"])
-	for (let i = 0; i < colors.length; i++) {
-		colors[i] = color(colors[i])
-	}
+	// console.log("color 0" + JSON.stringify(colors[0]))
+	// for (let i = 0; i < colors.length; i++) {
+	// 	colors[i] = color(...colors[i])
+	// }
+	console.log("colors: " + colors)
 	console.log("Num Colors: " + colors.length)
+	// console.log("color 0 : " + po(colors[0]))
 	// colors = getGlitchColorHSL(NUM_COLORS, "SPLIT_COMPLIMENTARY", { degree: 80 })
 	background(13)
 	// colors = getGlitchColorHSL(palette.n, "ANALOGOUS", { degree: palette.degrees, seedColor: [palette.startHue, 80 + int(random() * 20), 50] })
 	// clrs = palettes[paletteInx]["colors"]
 	// bgColor = rclr();
+	birthday = ~~(fxrand() * 365)
+	console.log("Birthday: " + birthday)
+	let d = new Date();
+	let day = d.getDate();//day of month
+	let m = d.getMonth();//curr month
+	// console.log("month/day: " + m + "/" + day)
+	currDay = dayOfYear(m, day)
+	let dayInCycle = birthday < currDay ? currDay - birthday : 365 - birthday + currDay
+
+	birthdayOffset = map(dayInCycle, 0, 365, 0, 1)
+	// birthdayOffset = (abs(currDay - birthday) % (365 / 2)) / (365 / 2)
+	console.log("Biretdahy: " + birthday + " - Currdat: " + currDay + ", offset" + birthdayOffset)
+	// console.log("days offset: " + daysoffset)
+	// console.log("birthdayOffset: " + birthdayOffset)
+
 	minIncrement = PI / 180
 
 	reDraw = true; paused = false;
 	// background(colors[ibtw(0, colors.length)])
-	let aveN = maxSquares / (colors.length)
+	let aveN = maxSquares / (colors.length * 2)
 	minN = Math.min(aveN, minN)
 	maxN = Math.min(aveN, maxN)
 	sinSquares = []
 	// sinSquares = sinSquares.concat(createSinSquareSpins("MEDIUM"))
-	sinSquares = sinSquares.concat(createSinSquareSpins("SMALL"))
+	let rows = 1
+	let cols = 1
+
+	for (let r = 0; r < rows; r++) {
+		for (let c = 0; c < cols; c++) {
+			sinSquares = sinSquares.concat(createSinSquareShape(
+				{
+					"mode": "MEDIUM",
+					"xRange": [(DIM / rows) * r, (DIM / rows) * (r + 1)],
+					"yRange": [(DIM / cols) * c, (DIM / cols) * (c + 1)],
+					"nFactor": (rows * cols),
+					"type": "SPIN"
+					// "type": "LINE"
+					// "type": "RING"
+				}))
+
+		}
+	}
+	rows = 1
+	cols = 1
+
+	for (let r = 0; r < rows; r++) {
+		for (let c = 0; c < cols; c++) {
+			sinSquares = sinSquares.concat(createSinSquareShape(
+				{
+					"mode": "MEDIUM",
+					"xRange": [(DIM / rows) * r, (DIM / rows) * (r + 1)],
+					"yRange": [(DIM / cols) * c, (DIM / cols) * (c + 1)],
+					"nFactor": (rows * cols),
+					// "type": "SPIN"
+					// "type": "LINE"
+					"type": "RING"
+				}))
+
+		}
+	}
 	// sinSquares = sinSquares.concat(createSinSquareLines())
-	// sinSquares = sinSquares.concat(createSinSquareRings())
+
+
 	// sinSquares = shuffle(sinSquares)
 	console.log("total sinSquarePAtterns: " + sinSquares.length)
 	console.log("total squares: " + totalSinSquares)
 	rotatingCanvases = []
+	let lineAlpha = .15
+	let alphaMax = colors[0]["maxes"]["hsl"][3]
+	lineAlpha = map(lineAlpha, 0, 1, 0, alphaMax)
+	// console.log("alphamax: " + alphaMax)
 	for (let i = 0; i < numCanvas; i++) {
 		let width = HEIGHT / numCanvas / 2
 		let lowerBound = i * (width)
 		let upperBound = HEIGHT - lowerBound
 		// fill(colors[i][0])
+		// let c1 = rFrom(colors)
+		// let c2 = rFrom(colors)
+		// let a1 = wA(c1, lineAlpha)
+		// let a2 = wA(c2, lineAlpha)
+		// console.log("----------")
+		// console.log("c1 " + JSON.stringify(c1))
+		// console.log("a1 " + JSON.stringify(a1))
+		// console.log("c2 " + JSON.stringify(c2))
+		// console.log("a2 " + JSON.stringify(a2))
 		rotatingCanvases.push(new RotatingLineCanvas([lowerBound, upperBound], [
-			new RotatingLineLayer(wA(rFrom(colors), 15), random(PI / 2), random(HEIGHT / 100, HEIGHT / 20), randomIncrement(PI / 40), random(0, 1), angleApproachThresholdPct, [0, PI / 2]),
-			new RotatingLineLayer(wA(rFrom(colors), 15), random(PI / 2) + PI / 2, random(HEIGHT / 100, HEIGHT / 20), randomIncrement(PI / 40), random(0, 1), angleApproachThresholdPct, [PI / 2, PI])
+			new RotatingLineLayer(wA(rFrom(colors), lineAlpha), wA(rFrom(colors), lineAlpha), random(PI / 2), random(HEIGHT / 100, HEIGHT / 10), randomIncrement(PI / 40), random(0, 1), angleApproachThresholdPct, [0, PI / 2]),
+			new RotatingLineLayer(wA(rFrom(colors), lineAlpha), wA(rFrom(colors), lineAlpha), random(PI / 2) + PI / 2, random(HEIGHT / 100, HEIGHT / 10), randomIncrement(PI / 40), random(0, 1), angleApproachThresholdPct, [PI / 2, PI])
 		]))
 	}
 	window.$fxhashFeatures = {
@@ -133,10 +206,13 @@ function keyPressed() {
 		noLoop()
 	} else if (keyCode == 68) { //d
 		debug = !debug
+	} else if (keyCode == 71) {  //g
+		captureGifFrames = !captureGifFrames
+		console.log("captureGifFrmes = " + captureGifFrames)
 	}
 }
 function draw() {
-
+	// blendMode(MULTIPLY)
 	if (reDraw) {
 		// squares()
 		strokeWeight(1)
@@ -156,6 +232,20 @@ function draw() {
 		sinSquare.draw()
 	}
 	globalCounter++
+	if (captureGifFrames) {
+		//saveFrame
+		console.log("sacing frame " + gifFrameCounter)
+		let gifNumberString = "" + gifFrameCounter
+		if (gifFrameCounter < 10) {
+			gifNumberString = "0" + gifFrameCounter
+		}
+		saveCanvas("fxgif" + gifNumberString, 'png')
+		// saveCanvas("gifframes//" + gifFrameCounter + "-" + fxhash, 'png')
+		if (++gifFrameCounter >= gifFrames) {
+			captureGifFrames = false
+			gifFrameCounter = 0
+		}
+	}
 	// if (globalCounter > 20) {
 	// 	noLoop()
 	// }
@@ -339,7 +429,7 @@ function doubleSplitGradient(ymin, ymax, wmin, wmax) {
 function getGlitchColorHSL(n, mode, options) {
 	hslColors = [];
 	colorMode(HSL)
-	hslColors.push(options.seedColor ? options.seedColor : [random() * 360, 80 + int(random() * 20), 50])
+	hslColors.push(options.seedColor ? options.seedColor : [random() * 360, 90 + int(random() * 10), 60])
 	console.log("start hue:" + hslColors[0][0]);
 	let degreeDiff;
 	switch (mode) {

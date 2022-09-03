@@ -1,5 +1,15 @@
 var TWOPI;
 var HALFPI;
+//days per month
+const dpm = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+function dayOfYear(m, d) {
+    let c = 0
+    for (let i = 0; i < m; i++) {
+        c += dpm[i]
+    }
+    c += d
+    return c
+}
 function initMask() {
     maskCanvas = createGraphics(DIM, DIM)
     maskCanvas.noStroke()
@@ -61,10 +71,15 @@ function vary(base_val, variance_pct) {
     // return base_val * (random() * variance_pct - variance_pct / 2)
     return base_val * variance_pct * (random() - 1 / 2)
 }
+function saturate(c, s) {
+    let newc = color(hue(c), saturation(s), lightness(c))
+    newc.setAlpha(alpha)
+    return newc
+}
 function shiftHSL(c, h, s, l) {
     new_hue = hue(c) + h
     while (new_hue < 0) new_hue += 360
-    return color(new_hue % 360, saturation(c) + s, lightness(c) + l)
+    return color(new_hue % 360, saturation(c) + s, lightness(c) + l, alpha(c))
 }
 function randomIncrement(a) {
     let inc = minIncrement + random(a)
@@ -81,7 +96,6 @@ function rFrom(list) {
     return list[ibtw(0, list.length)]
 }
 function randomShiftHSL(c, h, s, l) {
-
     return color(
         hue(c) + ibtw(0 - h, h),
         saturation(c) + ibtw(0 - s, s),
@@ -95,10 +109,19 @@ function saturate(c, s) {
 }
 function wA(c, a) {
     // console.log("alpga: " + a)
-    // let newc = color(red(c), green(c), blue(c), a)
-    c.setAlpha(a)
-    // console.log("newc w alpha: " + c)
-    return c
+    let newc = color(hue(c), saturation(c), lightness(c), a)
+    return newc
+    // console.log("!!!!!!!1")
+    // console.log("before setAlpha: " + JSON.stringify(c))
+    // console.log("before tostring: " + c.toString("hsla"))
+    // console.log("before setAlpha: " + JSON.stringify(c))
+
+    // c.setAlpha(a)
+    // console.log("after setAlpha: " + JSON.stringify(c))
+    // console.log("after tostring: " + c.toString("hsla"))
+    // console.log("after setAlpha: " + JSON.stringify(c))
+    // // console.log("newc w alpha: " + c)
+    // return c
 }
 function getIntersectionOfTwoLines(l1, l2) {
     let x1 = l1.p1.x;
@@ -189,7 +212,23 @@ class OscParm {
         if (this.val <= this.lowerBound || this.val >= this.upperBound) this.inc *= -1
     }
 }
+class AnnualParm {
+    constructor(name, bounds, speed, movementPattern, birthdayOffset) {
+        this.name = name
+        this.bounds = bounds //[0, 10]
+        this.speed = speed
+        this.movementPattern = movementPattern
+        this.setVal(birthdayOffset)
+    }
 
+    setVal(birthdayOffset) {
+        if (this.movementPattern == "COS") {
+            let radians = map(birthdayOffset, 0, 1, 0, TWOPI)
+            this.val = map(cos(radians), -1, 1, ...this.bounds)
+        }
+        console.log(this.name + " :set val: " + this.val)
+    }
+}
 function storePalette(palette) {
     var paletteJson = JSON.parse(palettes);
     paletteJson.add(palette)
@@ -223,4 +262,20 @@ function calcXYonCircle(vX, vY, radius, angle) {
         console.log("radius: " + radius)
     }
     return [vX + cos(angle) * radius, vY + sin(angle) * radius]
+}
+
+function po(o) {
+    var str = '';
+
+    for (var p in o) {
+        if (typeof o[p] == 'string') {
+            console.log(p + ': ' + o[p])
+        } else {
+            console.log(p + " :-")
+            po(o[p])
+            console.log(p + " -:")
+        }
+    }
+
+    return str;
 }
