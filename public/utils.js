@@ -168,8 +168,12 @@ function cube(c, x, y, r) {
 
 }
 class RadialSpinParm {
-    constructor(inc) {
-        this.val = random() * 2 * PI
+    constructor(inc, start) {
+        if (start) {
+            this.val = start
+        } else {
+            this.val = random() * 2 * PI
+        }
         this.inc = inc
     }
     increment() {
@@ -179,6 +183,27 @@ class RadialSpinParm {
         } else if (this.val > (2 * PI)) {
             this.val -= (2 * PI) * (Math.abs(this.val) / (2 * PI))
         }
+    }
+}
+class OrbitParm {
+    constructor(v, a, mag, sp) {
+        this.vertex = v
+        this.angle = a
+        this.speed = sp
+        this.mag = mag
+        this.setVal()
+
+    }
+    increment() {
+        this.angle = rotateAngle(this.angle, this.speed)
+        // console.log("new angle: " + this.angle)
+        this.setVal()
+    }
+    setVal() {
+        this.val = [
+            this.vertex[0] + cos(this.angle) * this.mag,
+            this.vertex[1] + sin(this.angle) * this.mag
+        ]
     }
 }
 class OscParm {
@@ -226,7 +251,7 @@ class AnnualParm {
             let radians = map(birthdayOffset, 0, 1, 0, TWOPI)
             this.val = map(cos(radians), -1, 1, ...this.bounds)
         }
-        console.log(this.name + " :set val: " + this.val)
+        // console.log(this.name + " :set val: " + this.val)
     }
 }
 function storePalette(palette) {

@@ -25,6 +25,7 @@ var gifFrames = 100
 var gifFrameCounter = 0
 var globalCounter = 0
 var maxSquares = 2000
+var patternParms
 var maxN = 40;
 var minN = 10;
 var WIDTH = window.innerWidth
@@ -52,6 +53,7 @@ var angleApproachThresholdPct = .08
 var numCanvas = 1
 var sinSquares; var rotatingCanvases
 var totalSinSquares = 0
+var patternType; var pattern
 // noprotect
 function setup() {
 	// palettes = get_palettes()
@@ -82,7 +84,7 @@ function setup() {
 
 	// colors = getGlitchColorHSL(NUM_COLORS, "SPLIT", { degree: 80 })
 	// colors = getGlitchColorHSL(NUM_COLORS, "ANALOGOUS", { degree: 80 })
-	console.log("palette['colors'] " + palette["colors"])
+	// console.log("palette['colors'] " + palette["colors"])
 	colors = shuffle(palette["colors"])
 	// console.log("color 0" + JSON.stringify(colors[0]))
 	// for (let i = 0; i < colors.length; i++) {
@@ -90,7 +92,6 @@ function setup() {
 	// }
 	console.log("colors: " + colors)
 	console.log("Num Colors: " + colors.length)
-	// console.log("color 0 : " + po(colors[0]))
 	// colors = getGlitchColorHSL(NUM_COLORS, "SPLIT_COMPLIMENTARY", { degree: 80 })
 	background(13)
 	// colors = getGlitchColorHSL(palette.n, "ANALOGOUS", { degree: palette.degrees, seedColor: [palette.startHue, 80 + int(random() * 20), 50] })
@@ -110,6 +111,7 @@ function setup() {
 	console.log("Biretdahy: " + birthday + " - Currdat: " + currDay + ", offset" + birthdayOffset)
 	// console.log("days offset: " + daysoffset)
 	// console.log("birthdayOffset: " + birthdayOffset)
+	selectPattern()
 
 	minIncrement = PI / 180
 
@@ -123,39 +125,23 @@ function setup() {
 	let rows = 1
 	let cols = 1
 
-	for (let r = 0; r < rows; r++) {
-		for (let c = 0; c < cols; c++) {
-			sinSquares = sinSquares.concat(createSinSquareShape(
-				{
-					"mode": "MEDIUM",
-					"xRange": [(DIM / rows) * r, (DIM / rows) * (r + 1)],
-					"yRange": [(DIM / cols) * c, (DIM / cols) * (c + 1)],
-					"nFactor": (rows * cols),
-					"type": "SPIN"
-					// "type": "LINE"
-					// "type": "RING"
-				}))
+	// for (let r = 0; r < rows; r++) {
+	// 	for (let c = 0; c < cols; c++) {
+	// 		sinSquares = sinSquares.concat(createSinSquareShape(
+	// 			{
+	// 				"mode": "MEDIUM",
+	// 				"xRange": [(DIM / rows) * r, (DIM / rows) * (r + 1)],
+	// 				"yRange": [(DIM / cols) * c, (DIM / cols) * (c + 1)],
+	// 				"nFactor": (rows * cols),
+	// 				"type": "SPIN"
+	// 				// "type": "LINE"
+	// 				// "type": "RING"
+	// 			}))
 
-		}
-	}
-	rows = 1
-	cols = 1
+	// 	}
+	// }
+	loadSquareSinForPattern()
 
-	for (let r = 0; r < rows; r++) {
-		for (let c = 0; c < cols; c++) {
-			sinSquares = sinSquares.concat(createSinSquareShape(
-				{
-					"mode": "MEDIUM",
-					"xRange": [(DIM / rows) * r, (DIM / rows) * (r + 1)],
-					"yRange": [(DIM / cols) * c, (DIM / cols) * (c + 1)],
-					"nFactor": (rows * cols),
-					// "type": "SPIN"
-					// "type": "LINE"
-					"type": "RING"
-				}))
-
-		}
-	}
 	// sinSquares = sinSquares.concat(createSinSquareLines())
 
 
@@ -246,6 +232,18 @@ function draw() {
 			gifFrameCounter = 0
 		}
 	}
+	strokeWeight(3)
+	stroke(255, 100, 50, 1)
+	noFill()
+	// rect(DIM / 2, DIM / 2, DIM * patternParms["center"] / 2, DIM * patternParms["center"] / 2)
+	// rectMode(CORNERS)
+	// stroke(70, 100, 50, 1)
+	// for (let rec of patternParms["rects"]) {
+	// console.log("drawing rec:" + rec)
+	// rect(rec[0][0], rec[1][0], rec[0][1], rec[1][1])
+	// }
+
+	rectMode(RADIUS)
 	// if (globalCounter > 20) {
 	// 	noLoop()
 	// }

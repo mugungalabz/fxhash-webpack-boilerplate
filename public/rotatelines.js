@@ -36,8 +36,8 @@ class RotatingLineLayer {
     constructor(color, color2, angle, increment, angleIncrement, incrementVariance, angleApproachThresholdPct, angleBounds) {
         this.color = color
         this.color2 = color2
-        console.log("color init: " + JSON.stringify(this.color))
-        console.log("color2 init: " + JSON.stringify(this.color2))
+        // console.log("color init: " + JSON.stringify(this.color))
+        // console.log("color2 init: " + JSON.stringify(this.color2))
         this.angle = angle
         this.increment = increment
         this.angleIncrement = angleIncrement
